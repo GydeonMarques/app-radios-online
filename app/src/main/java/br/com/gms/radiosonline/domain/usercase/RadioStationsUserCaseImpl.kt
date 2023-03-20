@@ -33,6 +33,20 @@ class RadioStationsUserCaseImpl @Inject constructor(
         }
     }
 
+    override suspend fun getRadioStationsByCategory(categories: List<String>): Flow<ResultModel<List<RadioModel>>> {
+        return withContext(dispatcher) {
+            remoteRadioStationsRepository.getRadioStationsByCategory(categories)
+                .map { result ->
+                    when (result) {
+                        is ResultModel.Failure -> result
+                        is ResultModel.Success -> ResultModel.Success(
+                            result.data.map { it.toModel() }
+                        )
+                    }
+                }
+        }
+    }
+
     override suspend fun getRadioCategories(): Flow<ResultModel<List<RadioCategoryModel>>> {
         return withContext(dispatcher) {
             remoteRadioStationsRepository.getRadioCategories()

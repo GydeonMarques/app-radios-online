@@ -24,9 +24,11 @@ class RadioStationsViewModel @Inject constructor(
     private var _radioStationsUiState = MutableStateFlow<RadioStationsUiState>(RadioStationsUiState.Loading)
     val radioStationsUiState: StateFlow<RadioStationsUiState> get() = _radioStationsUiState
 
-    private var _radioCategoriesUiState = MutableStateFlow<RadioCategoryUiState>(
-        RadioCategoryUiState.Loading)
+    private var _radioCategoriesUiState = MutableStateFlow<RadioCategoryUiState>(RadioCategoryUiState.Loading)
     val radioCategoriesUiState: StateFlow<RadioCategoryUiState> get() = _radioCategoriesUiState
+
+    private var _appliedFilter = MutableStateFlow(false)
+    val appliedFilter: StateFlow<Boolean> get() = _appliedFilter
 
     init {
         getRadioStations()
@@ -73,6 +75,38 @@ class RadioStationsViewModel @Inject constructor(
         }
     }
 
+    fun applyRadioStationFilter() {
+        radioCategoriesUiState.value.takeIf { it is RadioCategoryUiState.Success }?.let { it ->
+            val categories = (it as RadioCategoryUiState.Success).categories
+                .filter { it.selected }
+                .map { it.name }
+
+            if(categories.isEmpty()) {
+                getRadioStations()
+                _appliedFilter.update { false }
+            } else {
+                viewModelScope.launch {
+                    _appliedFilter.update { true }
+                    _radioStationsUiState.update { RadioStationsUiState.Loading }
+                    useCase.getRadioStationsByCategory(categories)
+                        .collect { response ->
+                            when (response) {
+                                is ResultModel.Failure -> _radioStationsUiState.update {
+                                    RadioStationsUiState.Failure(response.throwable)
+                                }
+                                is ResultModel.Success -> _radioStationsUiState.update {
+                                    RadioStationsUiState.Success(
+                                        topRadiosStations = response.data.filter { it.topRadio },
+                                        listRadioStations = mapListOfRadiosByCategories(response.data)
+                                    )
+                                }
+                            }
+                        }
+                }
+            }
+        }
+    }
+
     fun onCategorySelected(category: RadioCategoryModel) {
         val categoriesUiState = _radioCategoriesUiState.value
 
@@ -87,7 +121,6 @@ class RadioStationsViewModel @Inject constructor(
             }
         }
     }
-
 
     private suspend fun mapListOfRadiosByCategories(list: List<RadioModel>): MutableMap<String, ArrayList<RadioModel>> {
         return withContext(Dispatchers.Default) {

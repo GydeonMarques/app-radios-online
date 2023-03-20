@@ -18,21 +18,24 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
+import androidx.lifecycle.viewmodel.compose.viewModel
 import br.com.gms.radiosonline.R
 import br.com.gms.radiosonline.presentation.components.ItemHeader
 import br.com.gms.radiosonline.presentation.components.RadioItem
 import br.com.gms.radiosonline.presentation.components.UiViewState
 import br.com.gms.radiosonline.presentation.screens.radio_stations.filter_dialog.RadioCategoryFilterDialog
+import br.com.gms.radiosonline.presentation.screens.radio_stations.filter_dialog.RadioCategoryUiState
 import br.com.gms.radiosonline.presentation.theme.*
 import com.airbnb.lottie.compose.LottieCompositionSpec
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun RadioStationsScreen(
-    viewModel: RadioStationsViewModel,
+    viewModel: RadioStationsViewModel = hiltViewModel(),
     onRadioNavigationToPlayer: (radioId: String) -> Unit = {}
 ) {
 
+    val appliedFilter by viewModel.appliedFilter.collectAsState()
     val radioUiState by viewModel.radioStationsUiState.collectAsState()
     val categoriesUiState by viewModel.radioCategoriesUiState.collectAsState()
 
@@ -47,6 +50,7 @@ fun RadioStationsScreen(
             },
             onClickFilter = {
                 showFilterDialog = false
+                viewModel.applyRadioStationFilter()
             },
             onCategorySelected = {
                 viewModel.onCategorySelected(it)
@@ -130,13 +134,19 @@ fun RadioStationsScreen(
                     )
                 )
 
-                if (listRadioStations.isEmpty() && searchText.isNotBlank()) {
+                if (listRadioStations.isEmpty()) {
                     UiViewState(
                         icon = LottieCompositionSpec.RawRes(R.raw.ic_empty_list),
-                        message = stringResource(
-                            R.string.no_results_found_for_your_search,
-                            searchText
-                        )
+                        message = if (appliedFilter) {
+                            stringResource(
+                                R.string.there_are_currently_no_radio_stations_available_for_the_applied_filter,
+                            )
+                        } else {
+                            stringResource(
+                                R.string.no_results_found_for_your_search,
+                                searchText
+                            )
+                        }
                     )
                 } else {
                     LazyColumn(
@@ -198,8 +208,6 @@ fun RadioStationsScreen(
 @Composable
 fun RadioStationsScreenPreview() {
     RadiosOnlineTheme {
-        RadioStationsScreen(
-            viewModel = hiltViewModel()
-        )
+        RadioStationsScreen()
     }
 }

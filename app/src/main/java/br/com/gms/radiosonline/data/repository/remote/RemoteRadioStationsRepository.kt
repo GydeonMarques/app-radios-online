@@ -9,4 +9,5 @@ import kotlinx.coroutines.flow.Flow
 interface RemoteRadioStationsRepository {
     suspend fun getRadioStations(): Flow<ResultModel<List<RadioResponseModel>>>
     suspend fun getRadioCategories(): Flow<ResultModel<List<RadioCategoryResponseModel>>>
+    suspend fun getRadioStationsByCategory(categories: List<String>): Flow<ResultModel<List<RadioResponseModel>>>
 }

@@ -14,6 +14,7 @@
     <string name="choose_which_radio_categories_you_want_to_view">Escolha quais categorias de rádios deseja visualizar</string>
     <string name="please_wait_a_moment_while_we_load_the_data">Aguarde um momento enquanto carregamos os dados…</string>
     <string name="there_are_currently_no_radio_stations_available">No momento não há estações de rádios disponíveis.</string>
+    <string name="there_are_currently_no_radio_stations_available_for_the_applied_filter">No momento não há estações de rádios disponíveis para o filtro aplicado.</string>
     <string name="top_radios">Top rádios</string>
     <string name="loading">Carregando</string>
     <string name="error">Erro</string>
