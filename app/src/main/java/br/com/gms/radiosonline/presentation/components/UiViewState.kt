@@ -18,6 +18,7 @@ import com.airbnb.lottie.compose.rememberLottieComposition
 
 @Composable
 fun UiViewState(
+    modifier: Modifier = Modifier,
     icon: LottieCompositionSpec,
     message: String,
 ) {
@@ -25,7 +26,7 @@ fun UiViewState(
     Column(
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally,
-        modifier = Modifier
+        modifier = modifier
             .fillMaxSize()
             .padding(
                 top = DefaultPadding,

@@ -4,8 +4,7 @@ import android.content.Context
 import androidx.room.Database
 import androidx.room.Room
 import androidx.room.RoomDatabase
-import br.com.encoding.dreams.radios.online.data.database.LocalRadioStationsDao
-import br.com.encoding.dreams.radios.online.domain.model.RadioCategoryModel
+import br.com.gms.radiosonline.domain.model.RadioCategoryModel
 import br.com.gms.radiosonline.domain.model.RadioModel
 
 @Database(

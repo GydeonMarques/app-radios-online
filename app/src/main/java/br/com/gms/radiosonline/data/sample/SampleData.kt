@@ -1,9 +1,22 @@
 package br.com.gms.radiosonline.data.sample
 
 import androidx.compose.ui.tooling.preview.datasource.LoremIpsum
+import br.com.gms.radiosonline.domain.model.RadioCategoryModel
 import br.com.gms.radiosonline.domain.model.RadioModel
 import java.util.UUID
 
+val sampleRadioCategories = listOf(
+    RadioCategoryModel(
+        id = UUID.randomUUID().toString(),
+        name = "Evangélica",
+        selected = false
+    ),
+    RadioCategoryModel(
+        id = UUID.randomUUID().toString(),
+        name = "Sertanejo",
+        selected = false
+    )
+)
 val sampleRadiosList = listOf(
     RadioModel(
         id = UUID.randomUUID().toString(),

@@ -2,8 +2,10 @@ package br.com.gms.radiosonline.domain.usercase
 
 import br.com.gms.radiosonline.data.model.ResultModel
 import br.com.gms.radiosonline.data.model.toModel
+import br.com.gms.radiosonline.data.model.toRadioCategoryModel
 import br.com.gms.radiosonline.data.repository.remote.RemoteRadioStationsRepository
 import br.com.gms.radiosonline.di.IoDispatcher
+import br.com.gms.radiosonline.domain.model.RadioCategoryModel
 import br.com.gms.radiosonline.domain.model.RadioModel
 import kotlinx.coroutines.CoroutineDispatcher
 import kotlinx.coroutines.flow.Flow
@@ -25,6 +27,20 @@ class RadioStationsUserCaseImpl @Inject constructor(
                         is ResultModel.Failure -> result
                         is ResultModel.Success -> ResultModel.Success(
                             result.data.map { it.toModel() }
+                        )
+                    }
+                }
+        }
+    }
+
+    override suspend fun getRadioCategories(): Flow<ResultModel<List<RadioCategoryModel>>> {
+        return withContext(dispatcher) {
+            remoteRadioStationsRepository.getRadioCategories()
+                .map { result ->
+                    when (result) {
+                        is ResultModel.Failure -> result
+                        is ResultModel.Success -> ResultModel.Success(
+                            result.data.map { it.toRadioCategoryModel() }
                         )
                     }
                 }

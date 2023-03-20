@@ -1,7 +1,6 @@
 package br.com.gms.radiosonline.presentation.screens.radio_stations
 
 import androidx.compose.foundation.*
-import androidx.compose.foundation.gestures.scrollable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
@@ -23,6 +22,7 @@ import br.com.gms.radiosonline.R
 import br.com.gms.radiosonline.presentation.components.ItemHeader
 import br.com.gms.radiosonline.presentation.components.RadioItem
 import br.com.gms.radiosonline.presentation.components.UiViewState
+import br.com.gms.radiosonline.presentation.screens.radio_stations.filter_dialog.RadioCategoryFilterDialog
 import br.com.gms.radiosonline.presentation.theme.*
 import com.airbnb.lottie.compose.LottieCompositionSpec
 
@@ -33,10 +33,28 @@ fun RadioStationsScreen(
     onRadioNavigationToPlayer: (radioId: String) -> Unit = {}
 ) {
 
-    var searchText by rememberSaveable { mutableStateOf("") }
-    val uiState by viewModel.uiState.collectAsState()
+    val radioUiState by viewModel.radioStationsUiState.collectAsState()
+    val categoriesUiState by viewModel.radioCategoriesUiState.collectAsState()
 
-    when (uiState) {
+    var searchText by rememberSaveable { mutableStateOf("") }
+    var showFilterDialog by rememberSaveable { mutableStateOf(false) }
+
+    if (showFilterDialog) {
+        RadioCategoryFilterDialog(
+            uiState = categoriesUiState,
+            onClickCancel = {
+                showFilterDialog = false
+            },
+            onClickFilter = {
+                showFilterDialog = false
+            },
+            onCategorySelected = {
+                viewModel.onCategorySelected(it)
+            }
+        )
+    }
+
+    when (radioUiState) {
         is RadioStationsUiState.Loading -> {
             UiViewState(
                 icon = LottieCompositionSpec.RawRes(R.raw.ic_loading),
@@ -51,14 +69,13 @@ fun RadioStationsScreen(
         }
         is RadioStationsUiState.Success -> {
 
-            val listRadioStations = (uiState as RadioStationsUiState.Success).listRadioStations
-            val topRadioStations = (uiState as RadioStationsUiState.Success).topRadiosStations
+            val listRadioStations = (radioUiState as RadioStationsUiState.Success).listRadioStations
+            val topRadioStations = (radioUiState as RadioStationsUiState.Success).topRadiosStations
 
             Column(
                 modifier = Modifier
                     .fillMaxSize()
                     .background(MaterialTheme.colors.background)
-
             ) {
 
                 Text(
@@ -80,7 +97,7 @@ fun RadioStationsScreen(
                             start = DefaultPadding
                         ),
                     onValueChange = {
-                       searchText = it
+                        searchText = it
                     },
                     label = { Text(stringResource(R.string.search_radio)) },
                     leadingIcon = {
@@ -102,6 +119,7 @@ fun RadioStationsScreen(
                                 .padding(DefaultDividerHeightMin)
                                 .clickable {
                                     //TODO - Implements
+                                    showFilterDialog = true
                                 }
                         )
                     },

@@ -1,4 +1,4 @@
-package br.com.encoding.dreams.radios.online.domain.model
+package br.com.gms.radiosonline.domain.model
 
 import android.os.Parcelable
 import androidx.room.Entity
@@ -9,6 +9,7 @@ import kotlinx.android.parcel.Parcelize
 @Entity(tableName = "category")
 data class RadioCategoryModel(
     @PrimaryKey
+    val id: String,
     val name: String,
     var selected: Boolean = false,
 ) : Parcelable

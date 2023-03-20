@@ -15,4 +15,9 @@
     <string name="please_wait_a_moment_while_we_load_the_data">Aguarde um momento enquanto carregamos os dados…</string>
     <string name="there_are_currently_no_radio_stations_available">No momento não há estações de rádios disponíveis.</string>
     <string name="top_radios">Top rádios</string>
+    <string name="loading">Carregando</string>
+    <string name="error">Erro</string>
+    <string name="ops">Ops!</string>
+    <string name="there_was_a_failure_loading_the_data">Ops… houve uma falha ao carregar os dados</string>
+    <string name="no_categories_available">Não há categorias disponíveis.</string>
 </resources>

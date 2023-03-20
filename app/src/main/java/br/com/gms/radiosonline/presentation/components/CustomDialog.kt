@@ -9,6 +9,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
+import androidx.compose.ui.tooling.preview.datasource.LoremIpsum
 import androidx.compose.ui.unit.dp
 import br.com.gms.radiosonline.presentation.theme.DefaultPadding
 import br.com.gms.radiosonline.presentation.theme.DefaultPaddingMin
@@ -16,13 +17,15 @@ import br.com.gms.radiosonline.presentation.theme.DefaultRadiusMin
 import br.com.gms.radiosonline.presentation.theme.RadiosOnlineTheme
 
 @Composable
-fun MyDefaultDialog(
+fun CustomDialog(
     title: String? = null,
     subTitle: String? = null,
     onClickCancel: () -> Unit = {},
     onClickConfirm: () -> Unit = {},
     positiveButtonText: String? = null,
     negativeButtonText: String? = null,
+    showPositiveButton: Boolean? = true,
+    showNegativeButton: Boolean? = true,
     content: @Composable (() -> Unit)? = null,
 ) {
     AlertDialog(
@@ -56,12 +59,15 @@ fun MyDefaultDialog(
         },
         buttons = {
             Row(
-                modifier = Modifier.padding(DefaultPadding),
+                modifier = Modifier.padding(
+                    start = DefaultPadding,
+                    end = DefaultPadding,
+                    bottom = DefaultPadding
+                ),
             ) {
 
-                if (!negativeButtonText.isNullOrBlank()) {
+                if (showNegativeButton == true && !negativeButtonText.isNullOrBlank()) {
                     OutlinedButton(
-
                         onClick = { onClickCancel() },
                         border = BorderStroke(1.dp, MaterialTheme.colors.secondary),
                         modifier = Modifier
@@ -71,18 +77,13 @@ fun MyDefaultDialog(
                         colors = ButtonDefaults.buttonColors(
                             backgroundColor = MaterialTheme.colors.background
                         ),
-                        contentPadding = PaddingValues(
-                            start = DefaultPadding,
-                            top = DefaultPadding,
-                            end = DefaultPadding,
-                            bottom = DefaultPadding
-                        ),
+                        contentPadding = PaddingValues(DefaultPadding),
                     ) {
                         Text(text = negativeButtonText, color = MaterialTheme.colors.secondary)
                     }
                 }
 
-                if (!positiveButtonText.isNullOrBlank()) {
+                if (showPositiveButton == true && !positiveButtonText.isNullOrBlank()) {
                     Button(
                         onClick = { onClickConfirm() },
                         modifier = Modifier
@@ -92,12 +93,7 @@ fun MyDefaultDialog(
                         colors = ButtonDefaults.buttonColors(
                             backgroundColor = MaterialTheme.colors.secondary
                         ),
-                        contentPadding = PaddingValues(
-                            start = DefaultPadding,
-                            top = DefaultPadding,
-                            end = DefaultPadding,
-                            bottom = DefaultPadding
-                        ),
+                        contentPadding = PaddingValues(DefaultPadding),
                     ) {
                         Text(text = positiveButtonText, color = Color.White)
                     }
@@ -113,15 +109,13 @@ fun MyDefaultDialog(
 @Composable
 private fun MyDefaultDialogPreview() {
     RadiosOnlineTheme {
-        MyDefaultDialog(
-            title = "O que é Lorem Ipsum?",
-            subTitle = "Lorem Ipsum é simplesmente uma simulação de texto da indústria tipográfica e de impressos, e vem sendo utilizado desde o século XVI.",
-            onClickCancel = {},
-            onClickConfirm = {},
+        CustomDialog(
+            title = LoremIpsum(3).values.first(),
+            subTitle = LoremIpsum(8).values.first(),
             positiveButtonText = "Ok",
             negativeButtonText = "Cancelar",
             content = {
-                Text(text = "Contéudo extra poderá ser adicionado aqui, no corpo do dialog")
+                Text(text = LoremIpsum(20).values.first())
             },
         )
     }
