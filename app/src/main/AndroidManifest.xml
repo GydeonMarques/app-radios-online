@@ -15,7 +15,9 @@
         <activity
             android:name=".presentation.activities.MainActivity"
             android:exported="true"
-            android:theme="@style/Theme.RadiosOnline">
+            android:screenOrientation="portrait"
+            android:theme="@style/Theme.RadiosOnline"
+            tools:ignore="LockedOrientationActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
 
