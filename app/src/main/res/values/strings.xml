@@ -8,6 +8,8 @@
     <string name="search">Pesquisar</string>
     <string name="filter_radio">Filtrar rádios</string>
     <string name="search_radio">Pesquisar rádio</string>
+    <string name="generic_error">O aplicativo encontrou um erro inesperado.</string>
+    <string name="error_media_not_found">Não foi possível localizar a rádio solicitada</string>
     <string name="add_to_favorites">Adicionar %s aos favoritos</string>
     <string name="no_results_found_for_your_search">Nenhum resultado encontrado para a sua pesquisa: %s</string>
     <string name="listen_to_your_favorite_radios_all_in_one_place">Ouça suas rádios favoritas\ntudo em um só lugar</string>
@@ -21,4 +23,9 @@
     <string name="ops">Ops!</string>
     <string name="there_was_a_failure_loading_the_data">Ops… houve uma falha ao carregar os dados</string>
     <string name="no_categories_available">Não há categorias disponíveis.</string>
+    <string name="back">Voltar</string>
+    <string name="play">Tocar</string>
+    <string name="next">Próximo</string>
+    <string name="close">Fechar</string>
+    <string name="radio_logo">Logo da rádio</string>
 </resources>
