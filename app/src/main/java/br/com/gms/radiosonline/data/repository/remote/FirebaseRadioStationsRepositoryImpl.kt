@@ -1,6 +1,7 @@
 package br.com.gms.radiosonline.data.repository.remote
 
 import br.com.gms.radiosonline.data.model.*
+import br.com.gms.radiosonline.domain.model.RadioModel
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 import kotlinx.coroutines.channels.awaitClose
@@ -29,6 +30,33 @@ class FirebaseRadioStationsRepositoryImpl : RemoteRadioStationsRepository {
 
                     awaitClose { subscription.remove() }
                 }
+            } catch (e: Throwable) {
+                trySend(ResultModel.Failure(e))
+                close(e)
+            }
+        }
+    }
+
+    override suspend fun searchRadioStations(text: String): Flow<ResultModel<List<RadioResponseModel>>> {
+        return callbackFlow {
+            try {
+                Firebase.firestore.collection(RADIO_STATIONS_COLLECTION_NAME)
+                    .also {
+                        val subscription = it.addSnapshotListener { snapshot, error ->
+                            snapshot?.let {
+                                snapshot.documents
+                                    .map { doc -> doc.toModel() }
+                                    .filter { doc -> doc.name.contains(text, ignoreCase = true) }
+                                    .apply {
+                                        trySend(ResultModel.Success(this))
+                                    }
+                            } ?: error?.let {
+                                trySend(ResultModel.Failure(error))
+                            }
+                        }
+
+                        awaitClose { subscription.remove() }
+                    }
             } catch (e: Throwable) {
                 trySend(ResultModel.Failure(e))
                 close(e)

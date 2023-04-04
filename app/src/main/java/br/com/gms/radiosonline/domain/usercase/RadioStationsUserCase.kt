@@ -9,5 +9,6 @@ import kotlinx.coroutines.flow.Flow
 interface RadioStationsUserCase {
     suspend fun getRadioStations(): Flow<ResultModel<List<RadioModel>>>
     suspend fun getRadioCategories(): Flow<ResultModel<List<RadioCategoryModel>>>
+    suspend fun searchRadioStations(text: String): Flow<ResultModel<List<RadioModel>>>
     suspend fun getRadioStationsByCategory(categories: List<String>): Flow<ResultModel<List<RadioModel>>>
 }

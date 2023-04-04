@@ -27,6 +27,7 @@ import br.com.gms.radiosonline.presentation.screens.radio_stations.filter_dialog
 import br.com.gms.radiosonline.presentation.screens.radio_stations.filter_dialog.RadioCategoryUiState
 import br.com.gms.radiosonline.presentation.theme.*
 import com.airbnb.lottie.compose.LottieCompositionSpec
+import kotlinx.coroutines.delay
 
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
@@ -102,6 +103,7 @@ fun RadioStationsScreen(
                         ),
                     onValueChange = {
                         searchText = it
+                        viewModel.searchRadioStations(it)
                     },
                     label = { Text(stringResource(R.string.search_radio)) },
                     leadingIcon = {

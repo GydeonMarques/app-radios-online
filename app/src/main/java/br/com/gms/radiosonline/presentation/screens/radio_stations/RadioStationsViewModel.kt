@@ -8,18 +8,18 @@ import br.com.gms.radiosonline.domain.model.RadioModel
 import br.com.gms.radiosonline.domain.usercase.RadioStationsUserCase
 import br.com.gms.radiosonline.presentation.screens.radio_stations.filter_dialog.RadioCategoryUiState
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
 @HiltViewModel
 class RadioStationsViewModel @Inject constructor(
     private val useCase: RadioStationsUserCase,
 ) : ViewModel() {
+
+    private val _radioStationsUiStateBkp = MutableStateFlow<RadioStationsUiState>(RadioStationsUiState.Loading)
 
     private var _radioStationsUiState = MutableStateFlow<RadioStationsUiState>(RadioStationsUiState.Loading)
     val radioStationsUiState: StateFlow<RadioStationsUiState> get() = _radioStationsUiState
@@ -29,6 +29,8 @@ class RadioStationsViewModel @Inject constructor(
 
     private var _appliedFilter = MutableStateFlow(false)
     val appliedFilter: StateFlow<Boolean> get() = _appliedFilter
+
+    private var searchTimeout = System.currentTimeMillis()
 
     init {
         getRadioStations()
@@ -48,7 +50,9 @@ class RadioStationsViewModel @Inject constructor(
                             RadioStationsUiState.Success(
                                 topRadiosStations = response.data.filter { it.topRadio },
                                 listRadioStations = mapListOfRadiosByCategories(response.data)
-                            )
+                            ).also {
+                                _radioStationsUiStateBkp.value = it
+                            }
                         }
                     }
                 }
@@ -75,13 +79,41 @@ class RadioStationsViewModel @Inject constructor(
         }
     }
 
+    fun searchRadioStations(text: String) {
+        if (text.isBlank()) {
+            _radioStationsUiState.update {
+               _radioStationsUiStateBkp.value
+            }
+        } else {
+            if ((System.currentTimeMillis() - searchTimeout) >= 1000) {
+                searchTimeout = System.currentTimeMillis()
+                viewModelScope.launch {
+                    useCase.searchRadioStations(text)
+                        .collect { response ->
+                            when (response) {
+                                is ResultModel.Failure -> _radioStationsUiState.update {
+                                    RadioStationsUiState.Failure(response.throwable)
+                                }
+                                is ResultModel.Success -> _radioStationsUiState.update {
+                                    RadioStationsUiState.Success(
+                                        topRadiosStations = response.data.filter { r -> r.topRadio },
+                                        listRadioStations = mapListOfRadiosByCategories(response.data)
+                                    )
+                                }
+                            }
+                        }
+                }
+            } else return
+        }
+    }
+
     fun applyRadioStationFilter() {
         radioCategoriesUiState.value.takeIf { it is RadioCategoryUiState.Success }?.let { it ->
             val categories = (it as RadioCategoryUiState.Success).categories
                 .filter { it.selected }
                 .map { it.name }
 
-            if(categories.isEmpty()) {
+            if (categories.isEmpty()) {
                 getRadioStations()
                 _appliedFilter.update { false }
             } else {
