@@ -1,11 +1,14 @@
 package br.com.gms.radiosonline.presentation.navigation
 
+import androidx.hilt.navigation.compose.hiltViewModel
 import androidx.navigation.NavController
 import androidx.navigation.NavGraphBuilder
 import androidx.navigation.NavOptions
 import androidx.navigation.compose.composable
+import br.com.gms.radiosonline.presentation.screens.playing_now.PlayingNowContent
+import br.com.gms.radiosonline.presentation.screens.playing_now.PlayingNowViewModel
 
-private const val radioIdParam = "radioId"
+internal const val radioIdParam = "radioId"
 internal const val playingNowRoute = "playing-now"
 
 fun NavController.navigateToPlayingNow(navOptions: NavOptions? = null) {
@@ -18,6 +21,9 @@ fun NavController.navigateToPlayingNow(radioId: String, navOptions: NavOptions? 
 
 fun NavGraphBuilder.playingNowScreen(navController: NavController) {
     composable("$playingNowRoute?$radioIdParam={$radioIdParam}") {
-        //TODO - Implements
+        val viewModel: PlayingNowViewModel = hiltViewModel()
+        PlayingNowContent(
+            viewModel = viewModel
+        )
     }
 }

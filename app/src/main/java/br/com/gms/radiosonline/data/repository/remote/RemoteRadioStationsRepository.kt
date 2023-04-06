@@ -8,6 +8,7 @@ import br.com.gms.radiosonline.domain.model.RadioModel
 import kotlinx.coroutines.flow.Flow
 
 interface RemoteRadioStationsRepository {
+    suspend fun getRadioStationById(id: String): Flow<ResultModel<RadioResponseModel?>>
     suspend fun getRadioStations(): Flow<ResultModel<List<RadioResponseModel>>>
     suspend fun getRadioCategories(): Flow<ResultModel<List<RadioCategoryResponseModel>>>
     suspend fun searchRadioStations(text: String): Flow<ResultModel<List<RadioResponseModel>>>

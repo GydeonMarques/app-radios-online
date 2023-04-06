@@ -19,6 +19,21 @@ class RadioStationsUserCaseImpl @Inject constructor(
     @IoDispatcher private val dispatcher: CoroutineDispatcher
 ) : RadioStationsUserCase {
 
+    override suspend fun getRadioStationById(id: String): Flow<ResultModel<RadioModel?>> {
+        return withContext(dispatcher) {
+            remoteRadioStationsRepository.getRadioStationById(id)
+                .map { result ->
+                    when (result) {
+                        is ResultModel.Failure -> result
+                        is ResultModel.Success -> ResultModel.Success(
+                            result.data?.toModel()
+                        )
+                    }
+                }
+        }
+    }
+
+
     override suspend fun getRadioStations(): Flow<ResultModel<List<RadioModel>>> {
         return withContext(dispatcher) {
             remoteRadioStationsRepository.getRadioStations()
