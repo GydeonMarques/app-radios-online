@@ -23,7 +23,6 @@ import com.google.android.exoplayer2.Player
 import com.google.android.exoplayer2.upstream.cache.CacheDataSource
 import dagger.hilt.android.AndroidEntryPoint
 import kotlinx.coroutines.*
-import java.io.File
 import javax.inject.Inject
 
 
@@ -109,7 +108,6 @@ class MediaPlayerService : MediaBrowserServiceCompat(), MediaPlayerNotificationL
 
     }
 
-
     override fun onCreate() {
         super.onCreate()
         initializePlayer()
@@ -169,6 +167,7 @@ class MediaPlayerService : MediaBrowserServiceCompat(), MediaPlayerNotificationL
                     }
 
                     override fun onPlayerError(error: PlaybackException) {
+
                         val message = if (error.errorCode == PlaybackException.ERROR_CODE_IO_FILE_NOT_FOUND) {
                             R.string.error_media_not_found
                         } else {
@@ -176,6 +175,7 @@ class MediaPlayerService : MediaBrowserServiceCompat(), MediaPlayerNotificationL
                         }
 
                         Toast.makeText(applicationContext, message, Toast.LENGTH_SHORT).show()
+                        updatePlaybackState(PlaybackStateCompat.STATE_ERROR)
                     }
                 })
             }
@@ -266,7 +266,7 @@ class MediaPlayerService : MediaBrowserServiceCompat(), MediaPlayerNotificationL
             PlaybackStateCompat.ACTION_PLAY_FROM_MEDIA_ID,
         )
 
-        actionOnRemove?.let { actions.removeAll(it) }
+        actionOnRemove?.let { actions.removeAll(it.toSet()) }
 
         return actions.reduce { acc, action -> (acc or action) }
     }
@@ -333,8 +333,6 @@ class MediaPlayerService : MediaBrowserServiceCompat(), MediaPlayerNotificationL
     }
 
     private fun stop() {
-        File(applicationContext.cacheDir, "media").deleteRecursively()
-
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O){
             audioManager.abandonAudioFocusRequest(audioFocusRequest)
         }else {
@@ -412,6 +410,7 @@ class MediaPlayerService : MediaBrowserServiceCompat(), MediaPlayerNotificationL
                 buildAllowedActions(actionOnRemove)
             }
             PlaybackStateCompat.STATE_NONE,
+            PlaybackStateCompat.STATE_ERROR,
             PlaybackStateCompat.STATE_PAUSED,
             PlaybackStateCompat.STATE_STOPPED -> {
 
@@ -424,7 +423,8 @@ class MediaPlayerService : MediaBrowserServiceCompat(), MediaPlayerNotificationL
 
                 buildAllowedActions(actionOnRemove)
 
-            } else -> 0
+            }
+            else -> 0
         }
 
         mediaSession.setPlaybackState(

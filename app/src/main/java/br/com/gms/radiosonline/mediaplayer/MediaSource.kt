@@ -10,6 +10,7 @@ import br.com.gms.radiosonline.data.model.RadioResponseModel
 import br.com.gms.radiosonline.data.model.ResultModel
 import br.com.gms.radiosonline.data.model.toModel
 import br.com.gms.radiosonline.data.repository.remote.RemoteRadioStationsRepository
+import br.com.gms.radiosonline.domain.model.RadioModel
 import com.google.android.exoplayer2.MediaItem
 import com.google.android.exoplayer2.source.ConcatenatingMediaSource
 import com.google.android.exoplayer2.source.ProgressiveMediaSource
@@ -119,4 +120,8 @@ class RadioStationMediaSource @Inject constructor(
             }
         }
     }
+}
+
+fun MediaDescriptionCompat.extractRadioModel(): RadioModel? {
+    return extras?.getParcelable<RadioModel>(RadioStationMediaSource.EXTRA_MEDIA_ITEM)
 }
