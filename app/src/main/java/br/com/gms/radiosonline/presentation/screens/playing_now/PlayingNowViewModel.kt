@@ -6,10 +6,12 @@ import android.support.v4.media.session.PlaybackStateCompat
 import androidx.lifecycle.*
 import br.com.gms.radiosonline.data.model.remote.ResultModel
 import br.com.gms.radiosonline.domain.model.RadioModel
+import br.com.gms.radiosonline.domain.usecase.RadioStationsFavoritesUseCase
 import br.com.gms.radiosonline.domain.usecase.RadioStationsListUseCase
 import br.com.gms.radiosonline.mediaplayer.MediaPlayerServiceConnection
 import br.com.gms.radiosonline.mediaplayer.extractRadioModel
 import br.com.gms.radiosonline.presentation.navigation.radioIdParam
+import br.com.gms.radiosonline.presentation.screens.radio_stations.RadioStationsUiState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
@@ -21,8 +23,10 @@ import javax.inject.Inject
 class PlayingNowViewModel @Inject constructor(
     private val state: SavedStateHandle,
     private val userCase: RadioStationsListUseCase,
-    private val serviceConnection: MediaPlayerServiceConnection
+    private val favoritesUseCase: RadioStationsFavoritesUseCase,
+    private val serviceConnection: MediaPlayerServiceConnection,
 ) : ViewModel() {
+
 
     private var _radioId: String? = null
     private var _currentMediaId: String? = null
@@ -96,6 +100,24 @@ class PlayingNowViewModel @Inject constructor(
                             }
                         }
                     }
+            }
+        }
+    }
+
+
+    fun addOrRemoveRadioStationFromFavorites(radioModel: RadioModel) {
+        viewModelScope.launch {
+            if (_playingNowUiState.value is PlayingNowUiState.Success) {
+
+                val state = (_playingNowUiState.value as PlayingNowUiState.Success)
+                val radioStation = radioModel.copy(isFavorite = !radioModel.isFavorite)
+                val hasBeenAddedOrRemovedSuccessfully = favoritesUseCase.addOrRemoveRadioStationFromFavorites(radioStation)
+
+                if (hasBeenAddedOrRemovedSuccessfully) {
+                    _playingNowUiState.value = state.copy(
+                        radioStation = radioStation
+                    )
+                }
             }
         }
     }

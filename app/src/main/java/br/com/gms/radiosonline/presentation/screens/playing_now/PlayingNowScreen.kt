@@ -325,7 +325,7 @@ fun PlayingNowContent(
                                     modifier = Modifier
                                         .size(50.dp),
                                     onClick = {
-                                        //TODO - Implements
+                                        viewModel.addOrRemoveRadioStationFromFavorites(radio)
                                     }
                                 ) {
                                     Icon(

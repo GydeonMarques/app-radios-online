@@ -3,6 +3,7 @@ package br.com.gms.radiosonline.data.repository.remote
 import br.com.gms.radiosonline.data.model.mapper.toModel
 import br.com.gms.radiosonline.data.model.mapper.toRadioCategoryModel
 import br.com.gms.radiosonline.data.model.remote.ResultModel
+import br.com.gms.radiosonline.data.repository.local.LocalRadioStationsRepository
 import br.com.gms.radiosonline.domain.model.RadioCategoryModel
 import br.com.gms.radiosonline.domain.model.RadioModel
 import com.google.firebase.firestore.ktx.firestore
@@ -16,15 +17,20 @@ private const val FILTER_FIELD_NAME = "category"
 private const val RADIO_STATIONS_COLLECTION_NAME = "radio_stations"
 private const val RADIO_CATEGORIES_COLLECTION_NAME = "radio_categories"
 
-class FirebaseRadioStationsRepositoryImpl @Inject constructor() : RemoteRadioStationsRepository {
+class FirebaseRadioStationsRepositoryImpl @Inject constructor(
+    private val localRadioStationsRepository: LocalRadioStationsRepository
+) : RemoteRadioStationsRepository {
 
     override suspend fun getRadioStationById(id: String): Flow<ResultModel<RadioModel?>> {
         return callbackFlow {
             try {
+               val radioFavorite = localRadioStationsRepository.getRadioStationFavoriteById(id)
                 Firebase.firestore.collection(RADIO_STATIONS_COLLECTION_NAME).document(id).also {
                     val subscription = it.addSnapshotListener { snapshot, error ->
                         snapshot?.let { doc ->
-                            trySend(ResultModel.Success(doc.toModel()))
+                            trySend(ResultModel.Success(doc.toModel().copy(
+                                isFavorite = radioFavorite?.isFavorite == true
+                            )))
 
                         } ?: error?.let {
                             trySend(ResultModel.Failure(error))
