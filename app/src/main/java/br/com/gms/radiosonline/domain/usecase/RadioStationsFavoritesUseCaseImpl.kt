@@ -11,18 +11,18 @@ import javax.inject.Inject
 
 class RadioStationsFavoritesUseCaseImpl @Inject constructor(
     private val localRadioStationsRepository: LocalRadioStationsRepository,
-    private val remoteRadioStationsRepository: RemoteRadioStationsRepository,
 ) : RadioStationsFavoritesUseCase {
 
-    override suspend fun addOrRemoveRadioStationFromFavorites(radioModel: RadioModel) {
-        TODO("Not yet implemented")
+    override suspend fun getFavoriteRadioStations(): Flow<List<RadioModel>> {
+        return localRadioStationsRepository.getRadioStationFavorites()
     }
 
-    override suspend fun getFavoriteRadioStations(): Flow<Map<String, List<RadioModel>>> {
-        TODO("Not yet implemented")
+    override suspend fun searchFavoriteRadioStations(text: String): Flow<List<RadioModel>> {
+        return localRadioStationsRepository.searchFavoriteRadioStations(text)
     }
 
-    override suspend fun searchFavoriteRadioStations(text: String): Flow<Map<String, List<RadioModel>>> {
-        TODO("Not yet implemented")
+    override suspend fun addOrRemoveRadioStationFromFavorites(radioModel: RadioModel): Boolean {
+       return localRadioStationsRepository.addOrRemoveRadioStationFromFavorites(radioModel)
     }
+
 }

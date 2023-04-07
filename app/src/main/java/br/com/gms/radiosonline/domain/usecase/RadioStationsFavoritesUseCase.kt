@@ -5,7 +5,7 @@ import kotlinx.coroutines.flow.Flow
 
 
 interface RadioStationsFavoritesUseCase {
-    suspend fun addOrRemoveRadioStationFromFavorites(radioModel: RadioModel)
-    suspend fun getFavoriteRadioStations(): Flow<Map<String, List<RadioModel>>>
-    suspend fun searchFavoriteRadioStations(text: String): Flow<Map<String, List<RadioModel>>>
+    suspend fun getFavoriteRadioStations(): Flow<List<RadioModel>>
+    suspend fun searchFavoriteRadioStations(text: String): Flow<List<RadioModel>>
+    suspend fun addOrRemoveRadioStationFromFavorites(radioModel: RadioModel): Boolean
 }

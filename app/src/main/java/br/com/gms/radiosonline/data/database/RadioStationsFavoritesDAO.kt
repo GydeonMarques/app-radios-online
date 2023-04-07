@@ -9,13 +9,13 @@ import kotlinx.coroutines.flow.Flow
 interface RadioStationsFavoritesDAO {
 
     @Insert
-    suspend fun save(model: RadioEntity)
+    suspend fun save(model: RadioEntity): Long
 
     @Query("SELECT * FROM ${DBConstants.FAVORITE_RADIO_TABLE_NAME} WHERE isFavorite = 1")
     fun getAll(): Flow<List<RadioEntity>>
 
     @Query("DELETE FROM ${DBConstants.FAVORITE_RADIO_TABLE_NAME} WHERE id = :id")
-    suspend fun deleteById(id: String)
+    suspend fun deleteById(id: String): Int
 
     @Query("SELECT * FROM ${DBConstants.FAVORITE_RADIO_TABLE_NAME} WHERE id = :id AND isFavorite = 1")
     suspend fun getById(id: String): RadioEntity?

@@ -23,17 +23,17 @@ class LocalRadioStationsRepositoryImpl @Inject constructor(
         return db.getById(id)?.toModel()
     }
 
-    override suspend fun addOrRemoveRadioStationFromFavorites(radioModel: RadioModel) {
-        when {
-            db.getById(radioModel.id) != null -> db.deleteById(radioModel.id)
-            else -> db.save(radioModel.copy(isFavorite = true).toEntity())
+    override suspend fun addOrRemoveRadioStationFromFavorites(radioModel: RadioModel): Boolean {
+        return when {
+            db.getById(radioModel.id) != null -> db.deleteById(radioModel.id) > 0
+            else -> db.save(radioModel.copy(isFavorite = true).toEntity()) > 0
         }
     }
 
     override suspend fun searchFavoriteRadioStations(text: String): Flow<List<RadioModel>> {
         return when {
             text.isNotEmpty() -> db.searchByName(text).map { it.toModel() }
-            else -> db.getAll().map { it.toModel()}
+            else -> db.getAll().map { it.toModel() }
         }
     }
 }
