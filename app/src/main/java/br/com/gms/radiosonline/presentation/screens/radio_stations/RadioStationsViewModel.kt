@@ -2,10 +2,10 @@ package br.com.gms.radiosonline.presentation.screens.radio_stations
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import br.com.gms.radiosonline.data.model.ResultModel
+import br.com.gms.radiosonline.data.model.remote.ResultModel
 import br.com.gms.radiosonline.domain.model.RadioCategoryModel
 import br.com.gms.radiosonline.domain.model.RadioModel
-import br.com.gms.radiosonline.domain.usercase.RadioStationsUserCase
+import br.com.gms.radiosonline.domain.usecase.RadioStationsListUseCase
 import br.com.gms.radiosonline.presentation.screens.radio_stations.filter_dialog.RadioCategoryUiState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.*
@@ -16,7 +16,7 @@ import javax.inject.Inject
 
 @HiltViewModel
 class RadioStationsViewModel @Inject constructor(
-    private val useCase: RadioStationsUserCase,
+    private val useCase: RadioStationsListUseCase,
 ) : ViewModel() {
 
     private val _radioStationsUiStateBkp = MutableStateFlow<RadioStationsUiState>(RadioStationsUiState.Loading)

@@ -3,16 +3,14 @@ package br.com.gms.radiosonline.presentation.screens.playing_now
 import android.support.v4.media.MediaBrowserCompat
 import android.support.v4.media.MediaMetadataCompat
 import android.support.v4.media.session.PlaybackStateCompat
-import android.util.Log
 import androidx.lifecycle.*
-import br.com.gms.radiosonline.data.model.ResultModel
+import br.com.gms.radiosonline.data.model.remote.ResultModel
 import br.com.gms.radiosonline.domain.model.RadioModel
-import br.com.gms.radiosonline.domain.usercase.RadioStationsUserCase
+import br.com.gms.radiosonline.domain.usecase.RadioStationsListUseCase
 import br.com.gms.radiosonline.mediaplayer.MediaPlayerServiceConnection
 import br.com.gms.radiosonline.mediaplayer.extractRadioModel
 import br.com.gms.radiosonline.presentation.navigation.radioIdParam
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
@@ -22,7 +20,7 @@ import javax.inject.Inject
 @HiltViewModel
 class PlayingNowViewModel @Inject constructor(
     private val state: SavedStateHandle,
-    private val userCase: RadioStationsUserCase,
+    private val userCase: RadioStationsListUseCase,
     private val serviceConnection: MediaPlayerServiceConnection
 ) : ViewModel() {
 

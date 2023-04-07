@@ -1,19 +1,24 @@
 package br.com.gms.radiosonline.data.repository.remote
 
-import br.com.gms.radiosonline.data.model.*
+import br.com.gms.radiosonline.data.model.mapper.toModel
+import br.com.gms.radiosonline.data.model.mapper.toRadioCategoryModel
+import br.com.gms.radiosonline.data.model.remote.ResultModel
+import br.com.gms.radiosonline.domain.model.RadioCategoryModel
+import br.com.gms.radiosonline.domain.model.RadioModel
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
+import javax.inject.Inject
 
 private const val FILTER_FIELD_NAME = "category"
 private const val RADIO_STATIONS_COLLECTION_NAME = "radio_stations"
 private const val RADIO_CATEGORIES_COLLECTION_NAME = "radio_categories"
 
-class FirebaseRadioStationsRepositoryImpl : RemoteRadioStationsRepository {
+class FirebaseRadioStationsRepositoryImpl @Inject constructor() : RemoteRadioStationsRepository {
 
-    override suspend fun getRadioStationById(id: String): Flow<ResultModel<RadioResponseModel?>> {
+    override suspend fun getRadioStationById(id: String): Flow<ResultModel<RadioModel?>> {
         return callbackFlow {
             try {
                 Firebase.firestore.collection(RADIO_STATIONS_COLLECTION_NAME).document(id).also {
@@ -36,7 +41,7 @@ class FirebaseRadioStationsRepositoryImpl : RemoteRadioStationsRepository {
     }
 
 
-    override suspend fun getRadioStations(): Flow<ResultModel<List<RadioResponseModel>>> {
+    override suspend fun getRadioStations(): Flow<ResultModel<List<RadioModel>>> {
         return callbackFlow {
             try {
                 Firebase.firestore.collection(RADIO_STATIONS_COLLECTION_NAME).also {
@@ -59,7 +64,7 @@ class FirebaseRadioStationsRepositoryImpl : RemoteRadioStationsRepository {
         }
     }
 
-    override suspend fun searchRadioStations(text: String): Flow<ResultModel<List<RadioResponseModel>>> {
+    override suspend fun searchRadioStations(text: String): Flow<ResultModel<List<RadioModel>>> {
         return callbackFlow {
             try {
                 Firebase.firestore.collection(RADIO_STATIONS_COLLECTION_NAME)
@@ -86,7 +91,7 @@ class FirebaseRadioStationsRepositoryImpl : RemoteRadioStationsRepository {
         }
     }
 
-    override suspend fun getRadioStationsByCategory(categories: List<String>): Flow<ResultModel<List<RadioResponseModel>>> {
+    override suspend fun getRadioStationsByCategory(categories: List<String>): Flow<ResultModel<List<RadioModel>>> {
         return callbackFlow {
             try {
                 Firebase.firestore.collection(RADIO_STATIONS_COLLECTION_NAME)
@@ -111,13 +116,13 @@ class FirebaseRadioStationsRepositoryImpl : RemoteRadioStationsRepository {
         }
     }
 
-    override suspend fun getRadioCategories(): Flow<ResultModel<List<RadioCategoryResponseModel>>> {
+    override suspend fun getRadioCategories(): Flow<ResultModel<List<RadioCategoryModel>>> {
         return callbackFlow {
             try {
                 Firebase.firestore.collection(RADIO_CATEGORIES_COLLECTION_NAME).also {
                     val subscription = it.addSnapshotListener { snapshot, error ->
                         snapshot?.let {
-                            snapshot.documents.map { doc -> doc.toRadioCategoryResponse() }.apply {
+                            snapshot.documents.map { doc -> doc.toRadioCategoryModel() }.apply {
                                 trySend(ResultModel.Success(this))
                             }
                         } ?: error?.let {

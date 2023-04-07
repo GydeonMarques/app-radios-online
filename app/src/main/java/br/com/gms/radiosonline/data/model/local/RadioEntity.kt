@@ -1,10 +1,12 @@
-package br.com.gms.radiosonline.domain.model
+package br.com.gms.radiosonline.data.model.local
 
-import android.os.Parcelable
-import kotlinx.android.parcel.Parcelize
+import androidx.room.Entity
+import androidx.room.PrimaryKey
+import br.com.gms.radiosonline.data.database.DBConstants
 
-@Parcelize
-data class RadioModel(
+@Entity(tableName = DBConstants.FAVORITE_RADIO_TABLE_NAME)
+data class RadioEntity(
+    @PrimaryKey
     val id: String,
     val name: String,
     val city: String,
@@ -15,6 +17,5 @@ data class RadioModel(
     val streamUrl: String,
     val description: String,
     val website: String? = null,
-    var topRadio: Boolean = false,
     var isFavorite: Boolean = false
-) : Parcelable
+)

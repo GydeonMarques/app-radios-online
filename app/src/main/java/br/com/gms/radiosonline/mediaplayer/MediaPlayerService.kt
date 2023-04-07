@@ -16,7 +16,7 @@ import android.support.v4.media.session.PlaybackStateCompat
 import android.widget.Toast
 import androidx.media.MediaBrowserServiceCompat
 import br.com.gms.radiosonline.R
-import br.com.gms.radiosonline.domain.usercase.RadioStationsUserCase
+import br.com.gms.radiosonline.domain.usecase.RadioStationsListUseCase
 import com.google.android.exoplayer2.ExoPlayer
 import com.google.android.exoplayer2.PlaybackException
 import com.google.android.exoplayer2.Player
@@ -40,7 +40,7 @@ class MediaPlayerService : MediaBrowserServiceCompat(), MediaPlayerNotificationL
     private lateinit var exoPlayer: ExoPlayer
 
     @Inject
-    lateinit var userCase: RadioStationsUserCase
+    lateinit var userCase: RadioStationsListUseCase
 
     private lateinit var audioManager: AudioManager
 
