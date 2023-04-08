@@ -20,6 +20,7 @@ class FavoritesViewModel @Inject constructor(
 
     private var _radioStationsFavoritesUiState = MutableStateFlow<RadioStationsFavoritesUiState>(RadioStationsFavoritesUiState.Loading)
     val radioStationsFavoritesUiState: StateFlow<RadioStationsFavoritesUiState> get() = _radioStationsFavoritesUiState
+    private var searchTimeout = System.currentTimeMillis()
 
     init {
         getFavoriteRadioStations()
@@ -41,17 +42,19 @@ class FavoritesViewModel @Inject constructor(
     }
 
     fun searchFavoriteRadioStations(text: String) {
-        viewModelScope.launch {
-            useCase.searchFavoriteRadioStations(text)
-                .catch { RadioStationsFavoritesUiState.Failure(it) }
-                .collect { radios ->
-                    _radioStationsFavoritesUiState.update {
-                        RadioStationsFavoritesUiState.Success(
-                            mapListOfRadiosByCategories(radios)
-                        )
+        if ((System.currentTimeMillis() - searchTimeout) >= 500 || text.isEmpty()) {
+            viewModelScope.launch {
+                useCase.searchFavoriteRadioStations(text)
+                    .catch { RadioStationsFavoritesUiState.Failure(it) }
+                    .collect { radios ->
+                        _radioStationsFavoritesUiState.update {
+                            RadioStationsFavoritesUiState.Success(
+                                mapListOfRadiosByCategories(radios)
+                            )
+                        }
                     }
-                }
-        }
+            }
+        } else return
     }
 
     fun removeRadioStationFromFavorites(radioModel: RadioModel) {

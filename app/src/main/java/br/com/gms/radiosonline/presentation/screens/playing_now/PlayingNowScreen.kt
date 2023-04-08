@@ -64,7 +64,7 @@ fun PlayingNowContent(
     when (uiState) {
         is PlayingNowUiState.Nothing -> {
             UiViewState(
-                icon = LottieCompositionSpec.RawRes(R.raw.ic_empty_list),
+                icon = LottieCompositionSpec.RawRes(R.raw.warning),
                 message = stringResource(R.string.there_are_currently_no_radios_running)
             )
         }

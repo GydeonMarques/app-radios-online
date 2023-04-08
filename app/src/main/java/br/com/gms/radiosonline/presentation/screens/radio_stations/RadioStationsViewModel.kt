@@ -24,8 +24,6 @@ class RadioStationsViewModel @Inject constructor(
     private val favoriteUseCase: RadioStationsFavoritesUseCase,
 ) : ViewModel() {
 
-    private val _radioStationsUiStateBkp = MutableStateFlow<RadioStationsUiState>(RadioStationsUiState.Loading)
-
     private var _radioStationsUiState = MutableStateFlow<RadioStationsUiState>(RadioStationsUiState.Loading)
     val radioStationsUiState: StateFlow<RadioStationsUiState> get() = _radioStationsUiState
 
@@ -55,9 +53,7 @@ class RadioStationsViewModel @Inject constructor(
                             RadioStationsUiState.Success(
                                 topRadiosStations = response.data.filter { it.topRadio },
                                 listRadioStations = mapListOfRadiosByCategories(response.data)
-                            ).also {
-                                _radioStationsUiStateBkp.value = it
-                            }
+                            )
                         }
                     }
                 }
@@ -85,31 +81,25 @@ class RadioStationsViewModel @Inject constructor(
     }
 
     fun searchRadioStations(text: String) {
-        if (text.isBlank()) {
-            _radioStationsUiState.update {
-               _radioStationsUiStateBkp.value
-            }
-        } else {
-            if ((System.currentTimeMillis() - searchTimeout) >= 1000) {
-                searchTimeout = System.currentTimeMillis()
-                viewModelScope.launch {
-                    useCase.searchRadioStations(text)
-                        .collect { response ->
-                            when (response) {
-                                is ResultModel.Failure -> _radioStationsUiState.update {
-                                    RadioStationsUiState.Failure(response.throwable)
-                                }
-                                is ResultModel.Success -> _radioStationsUiState.update {
-                                    RadioStationsUiState.Success(
-                                        topRadiosStations = response.data.filter { r -> r.topRadio },
-                                        listRadioStations = mapListOfRadiosByCategories(response.data)
-                                    )
-                                }
+        if ((System.currentTimeMillis() - searchTimeout) >= 500 || text.isEmpty()) {
+            searchTimeout = System.currentTimeMillis()
+            viewModelScope.launch {
+                useCase.searchRadioStations(text)
+                    .collect { response ->
+                        when (response) {
+                            is ResultModel.Failure -> _radioStationsUiState.update {
+                                RadioStationsUiState.Failure(response.throwable)
+                            }
+                            is ResultModel.Success -> _radioStationsUiState.update {
+                                RadioStationsUiState.Success(
+                                    topRadiosStations = response.data.filter { r -> r.topRadio },
+                                    listRadioStations = mapListOfRadiosByCategories(response.data)
+                                )
                             }
                         }
-                }
-            } else return
-        }
+                    }
+            }
+        } else return
     }
 
     fun applyRadioStationFilter() {
