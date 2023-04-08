@@ -165,7 +165,7 @@ class RadioStationsViewModel @Inject constructor(
 
                 val state = (_radioStationsUiState.value as RadioStationsUiState.Success)
 
-                val hasBeenAddedOrRemovedSuccessfully =favoriteUseCase.addOrRemoveRadioStationFromFavorites(radioModel.copy(
+                val hasBeenAddedOrRemovedSuccessfully = favoriteUseCase.addOrRemoveRadioStationFromFavorites(radioModel.copy(
                     isFavorite = !radioModel.isFavorite
                 ))
 

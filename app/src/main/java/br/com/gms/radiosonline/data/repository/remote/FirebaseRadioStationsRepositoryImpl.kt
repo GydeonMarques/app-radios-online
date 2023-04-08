@@ -11,6 +11,7 @@ import com.google.firebase.ktx.Firebase
 import kotlinx.coroutines.channels.awaitClose
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.callbackFlow
+import kotlinx.coroutines.flow.combine
 import javax.inject.Inject
 
 private const val FILTER_FIELD_NAME = "category"
@@ -24,13 +25,17 @@ class FirebaseRadioStationsRepositoryImpl @Inject constructor(
     override suspend fun getRadioStationById(id: String): Flow<ResultModel<RadioModel?>> {
         return callbackFlow {
             try {
-               val radioFavorite = localRadioStationsRepository.getRadioStationFavoriteById(id)
+                val radioFavorite = localRadioStationsRepository.getRadioStationFavoriteById(id)
                 Firebase.firestore.collection(RADIO_STATIONS_COLLECTION_NAME).document(id).also {
                     val subscription = it.addSnapshotListener { snapshot, error ->
                         snapshot?.let { doc ->
-                            trySend(ResultModel.Success(doc.toModel().copy(
-                                isFavorite = radioFavorite?.isFavorite == true
-                            )))
+                            trySend(
+                                ResultModel.Success(
+                                    doc.toModel().copy(
+                                        isFavorite = radioFavorite?.isFavorite == true
+                                    )
+                                )
+                            )
 
                         } ?: error?.let {
                             trySend(ResultModel.Failure(error))
@@ -46,16 +51,17 @@ class FirebaseRadioStationsRepositoryImpl @Inject constructor(
         }
     }
 
-
     override suspend fun getRadioStations(): Flow<ResultModel<List<RadioModel>>> {
         return callbackFlow {
             try {
                 Firebase.firestore.collection(RADIO_STATIONS_COLLECTION_NAME).also {
                     val subscription = it.addSnapshotListener { snapshot, error ->
                         snapshot?.let {
-                            snapshot.documents.map { doc -> doc.toModel() }.apply {
-                                trySend(ResultModel.Success(this))
-                            }
+                            snapshot.documents
+                                .map { doc -> doc.toModel() }
+                                .apply {
+                                    trySend(ResultModel.Success(this))
+                                }
                         } ?: error?.let {
                             trySend(ResultModel.Failure(error))
                         }
@@ -67,7 +73,7 @@ class FirebaseRadioStationsRepositoryImpl @Inject constructor(
                 trySend(ResultModel.Failure(e))
                 close(e)
             }
-        }
+        }.checkFavoriteItems()
     }
 
     override suspend fun searchRadioStations(text: String): Flow<ResultModel<List<RadioModel>>> {
@@ -79,7 +85,40 @@ class FirebaseRadioStationsRepositoryImpl @Inject constructor(
                             snapshot?.let {
                                 snapshot.documents
                                     .map { doc -> doc.toModel() }
-                                    .filter { doc -> doc.name.contains(text, ignoreCase = true) }
+                                    .filter { doc ->
+                                        doc.name.contains(
+                                            text,
+                                            ignoreCase = true
+                                        )
+                                    }
+                                    .apply {
+                                        trySend(ResultModel.Success(this))
+                                    }
+                            } ?: error?.let {
+                                trySend(ResultModel.Failure(error))
+                            }
+                        }
+
+                        awaitClose { subscription.remove() }
+                    }
+
+            } catch (e: Throwable) {
+                trySend(ResultModel.Failure(e))
+                close(e)
+            }
+        }.checkFavoriteItems()
+    }
+
+    override suspend fun getRadioStationsByCategory(categories: List<String>): Flow<ResultModel<List<RadioModel>>> {
+        return callbackFlow {
+            try {
+                Firebase.firestore.collection(RADIO_STATIONS_COLLECTION_NAME)
+                    .whereIn(FILTER_FIELD_NAME, categories)
+                    .also {
+                        val subscription = it.addSnapshotListener { snapshot, error ->
+                            snapshot?.let {
+                                snapshot.documents
+                                    .map { doc -> doc.toModel() }
                                     .apply {
                                         trySend(ResultModel.Success(this))
                                     }
@@ -94,32 +133,7 @@ class FirebaseRadioStationsRepositoryImpl @Inject constructor(
                 trySend(ResultModel.Failure(e))
                 close(e)
             }
-        }
-    }
-
-    override suspend fun getRadioStationsByCategory(categories: List<String>): Flow<ResultModel<List<RadioModel>>> {
-        return callbackFlow {
-            try {
-                Firebase.firestore.collection(RADIO_STATIONS_COLLECTION_NAME)
-                    .whereIn(FILTER_FIELD_NAME, categories)
-                    .also {
-                        val subscription = it.addSnapshotListener { snapshot, error ->
-                            snapshot?.let {
-                                snapshot.documents.map { doc -> doc.toModel() }.apply {
-                                    trySend(ResultModel.Success(this))
-                                }
-                            } ?: error?.let {
-                                trySend(ResultModel.Failure(error))
-                            }
-                        }
-
-                        awaitClose { subscription.remove() }
-                    }
-            } catch (e: Throwable) {
-                trySend(ResultModel.Failure(e))
-                close(e)
-            }
-        }
+        }.checkFavoriteItems()
     }
 
     override suspend fun getRadioCategories(): Flow<ResultModel<List<RadioCategoryModel>>> {
@@ -141,6 +155,23 @@ class FirebaseRadioStationsRepositoryImpl @Inject constructor(
             } catch (e: Throwable) {
                 trySend(ResultModel.Failure(e))
                 close(e)
+            }
+        }
+    }
+
+    private suspend fun Flow<ResultModel<List<RadioModel>>>.checkFavoriteItems(): Flow<ResultModel<List<RadioModel>>> {
+        return combine(localRadioStationsRepository.getRadioStationFavorites()) { result, favorites ->
+            when (result) {
+                is ResultModel.Success -> result.copy(
+                    data = result.data.map { radioModel ->
+                        radioModel.copy(
+                            isFavorite = favorites.find { favorite ->
+                                favorite.id == radioModel.id
+                            } != null
+                        )
+                    }
+                )
+                else -> result
             }
         }
     }
