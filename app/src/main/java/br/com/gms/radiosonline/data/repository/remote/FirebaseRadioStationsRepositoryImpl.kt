@@ -77,7 +77,9 @@ class FirebaseRadioStationsRepositoryImpl @Inject constructor(
     }
 
     override suspend fun searchRadioStations(text: String): Flow<ResultModel<List<RadioModel>>> {
-        return callbackFlow {
+        return if (text.isEmpty()){
+            getRadioStations()
+        } else callbackFlow {
             try {
                 Firebase.firestore.collection(RADIO_STATIONS_COLLECTION_NAME)
                     .also {
