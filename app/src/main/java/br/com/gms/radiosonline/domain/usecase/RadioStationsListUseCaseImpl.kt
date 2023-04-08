@@ -1,8 +1,6 @@
-package br.com.gms.radiosonline.domain.usercase
+package br.com.gms.radiosonline.domain.usecase
 
-import br.com.gms.radiosonline.data.model.ResultModel
-import br.com.gms.radiosonline.data.model.toModel
-import br.com.gms.radiosonline.data.model.toRadioCategoryModel
+import br.com.gms.radiosonline.data.model.remote.ResultModel
 import br.com.gms.radiosonline.data.repository.remote.RemoteRadioStationsRepository
 import br.com.gms.radiosonline.di.IoDispatcher
 import br.com.gms.radiosonline.domain.model.RadioCategoryModel
@@ -14,10 +12,10 @@ import kotlinx.coroutines.withContext
 import javax.inject.Inject
 
 
-class RadioStationsUserCaseImpl @Inject constructor(
+class RadioStationsListUseCaseImpl @Inject constructor(
     private val remoteRadioStationsRepository: RemoteRadioStationsRepository,
     @IoDispatcher private val dispatcher: CoroutineDispatcher
-) : RadioStationsUserCase {
+) : RadioStationsListUseCase {
 
     override suspend fun getRadioStationById(id: String): Flow<ResultModel<RadioModel?>> {
         return withContext(dispatcher) {
@@ -25,9 +23,7 @@ class RadioStationsUserCaseImpl @Inject constructor(
                 .map { result ->
                     when (result) {
                         is ResultModel.Failure -> result
-                        is ResultModel.Success -> ResultModel.Success(
-                            result.data?.toModel()
-                        )
+                        is ResultModel.Success -> ResultModel.Success(result.data)
                     }
                 }
         }
@@ -40,9 +36,7 @@ class RadioStationsUserCaseImpl @Inject constructor(
                 .map { result ->
                     when (result) {
                         is ResultModel.Failure -> result
-                        is ResultModel.Success -> ResultModel.Success(
-                            result.data.map { it.toModel() }
-                        )
+                        is ResultModel.Success -> ResultModel.Success(result.data)
                     }
                 }
         }
@@ -54,9 +48,7 @@ class RadioStationsUserCaseImpl @Inject constructor(
                 .map { result ->
                     when (result) {
                         is ResultModel.Failure -> result
-                        is ResultModel.Success -> ResultModel.Success(
-                            result.data.map { it.toModel() }
-                        )
+                        is ResultModel.Success -> ResultModel.Success(result.data)
                     }
                 }
         }
@@ -68,9 +60,7 @@ class RadioStationsUserCaseImpl @Inject constructor(
                 .map { result ->
                     when (result) {
                         is ResultModel.Failure -> result
-                        is ResultModel.Success -> ResultModel.Success(
-                            result.data.map { it.toModel() }
-                        )
+                        is ResultModel.Success -> ResultModel.Success(result.data)
                     }
                 }
         }
@@ -82,9 +72,7 @@ class RadioStationsUserCaseImpl @Inject constructor(
                 .map { result ->
                     when (result) {
                         is ResultModel.Failure -> result
-                        is ResultModel.Success -> ResultModel.Success(
-                            result.data.map { it.toRadioCategoryModel() }
-                        )
+                        is ResultModel.Success -> ResultModel.Success(result.data)
                     }
                 }
         }

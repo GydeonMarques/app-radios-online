@@ -6,9 +6,7 @@ import android.support.v4.media.MediaBrowserCompat
 import android.support.v4.media.MediaBrowserCompat.MediaItem.FLAG_PLAYABLE
 import android.support.v4.media.MediaDescriptionCompat
 import android.support.v4.media.MediaMetadataCompat
-import br.com.gms.radiosonline.data.model.RadioResponseModel
-import br.com.gms.radiosonline.data.model.ResultModel
-import br.com.gms.radiosonline.data.model.toModel
+import br.com.gms.radiosonline.data.model.remote.ResultModel
 import br.com.gms.radiosonline.data.repository.remote.RemoteRadioStationsRepository
 import br.com.gms.radiosonline.domain.model.RadioModel
 import com.google.android.exoplayer2.MediaItem
@@ -76,7 +74,7 @@ class RadioStationMediaSource @Inject constructor(
         return radioStationMetaData.find { it.description.mediaId == mediaId }
     }
 
-    private fun buildMediaItem(list: List<RadioResponseModel>) {
+    private fun buildMediaItem(list: List<RadioModel>) {
         _radioStationsMediaItem.value = list.map { radio ->
             MediaBrowserCompat.MediaItem(
                 MediaDescriptionCompat.Builder()
@@ -86,14 +84,14 @@ class RadioStationMediaSource @Inject constructor(
                     .setDescription(radio.description)
                     .setIconUri(Uri.parse(radio.logoUrl))
                     .setMediaUri(Uri.parse(radio.streamUrl))
-                    .setExtras(Bundle().apply { putParcelable(EXTRA_MEDIA_ITEM, radio.toModel()) })
+                    .setExtras(Bundle().apply { putParcelable(EXTRA_MEDIA_ITEM, radio) })
                     .build(),
                 FLAG_PLAYABLE
             )
         }.toMutableList()
     }
 
-    private fun buildMetaData(list: List<RadioResponseModel>) {
+    private fun buildMetaData(list: List<RadioModel>) {
         radioStationMetaData = list.map { radio ->
             MediaMetadataCompat.Builder()
                 .putString(MediaMetadataCompat.METADATA_KEY_TITLE, radio.name)

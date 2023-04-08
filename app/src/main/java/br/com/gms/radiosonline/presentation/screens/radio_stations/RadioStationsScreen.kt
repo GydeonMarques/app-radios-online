@@ -32,7 +32,7 @@ import kotlinx.coroutines.delay
 @OptIn(ExperimentalFoundationApi::class)
 @Composable
 fun RadioStationsScreen(
-    viewModel: RadioStationsViewModel = hiltViewModel(),
+    viewModel: RadioStationsViewModel,
     onRadioNavigationToPlayer: (radioId: String) -> Unit = {}
 ) {
 
@@ -124,14 +124,13 @@ fun RadioStationsScreen(
                                 .size(48.dp)
                                 .padding(DefaultDividerHeightMin)
                                 .clickable {
-                                    //TODO - Implements
                                     showFilterDialog = true
                                 }
                         )
                     },
                     colors = TextFieldDefaults.outlinedTextFieldColors(
-                        focusedBorderColor = GrayDark,
-                        unfocusedBorderColor = GrayDark,
+                        focusedBorderColor = MaterialTheme.colors.onSurface,
+                        unfocusedBorderColor = MaterialTheme.colors.onSurface,
                         cursorColor = MaterialTheme.colors.onSurface
                     )
                 )
@@ -194,7 +193,7 @@ fun RadioStationsScreen(
                                         onRadioNavigationToPlayer(radioModel.id)
                                     },
                                     addOrRemoveFromFavorites = {
-                                        //TODO - Implements
+                                        viewModel.addOrRemoveRadioStationFromFavorites(it)
                                     }
                                 )
                             }
@@ -210,6 +209,8 @@ fun RadioStationsScreen(
 @Composable
 fun RadioStationsScreenPreview() {
     RadiosOnlineTheme {
-        RadioStationsScreen()
+        RadioStationsScreen(
+            viewModel = hiltViewModel()
+        )
     }
 }

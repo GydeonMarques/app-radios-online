@@ -1,4 +1,4 @@
-package br.com.gms.radiosonline.data.model
+package br.com.gms.radiosonline.data.model.remote
 
 sealed class ResultModel<out T> {
 

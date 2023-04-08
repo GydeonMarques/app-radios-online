@@ -2,21 +2,26 @@ package br.com.gms.radiosonline.presentation.screens.radio_stations
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
-import br.com.gms.radiosonline.data.model.ResultModel
+import br.com.gms.radiosonline.data.model.mapper.mapListOfRadiosByCategories
+import br.com.gms.radiosonline.data.model.remote.ResultModel
 import br.com.gms.radiosonline.domain.model.RadioCategoryModel
 import br.com.gms.radiosonline.domain.model.RadioModel
-import br.com.gms.radiosonline.domain.usercase.RadioStationsUserCase
+import br.com.gms.radiosonline.domain.usecase.RadioStationsFavoritesUseCase
+import br.com.gms.radiosonline.domain.usecase.RadioStationsListUseCase
+import br.com.gms.radiosonline.presentation.screens.favorites.RadioStationsFavoritesUiState
 import br.com.gms.radiosonline.presentation.screens.radio_stations.filter_dialog.RadioCategoryUiState
 import dagger.hilt.android.lifecycle.HiltViewModel
 import kotlinx.coroutines.*
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.update
 import javax.inject.Inject
 
 @HiltViewModel
 class RadioStationsViewModel @Inject constructor(
-    private val useCase: RadioStationsUserCase,
+    private val useCase: RadioStationsListUseCase,
+    private val favoriteUseCase: RadioStationsFavoritesUseCase,
 ) : ViewModel() {
 
     private val _radioStationsUiStateBkp = MutableStateFlow<RadioStationsUiState>(RadioStationsUiState.Loading)
@@ -154,16 +159,37 @@ class RadioStationsViewModel @Inject constructor(
         }
     }
 
-    private suspend fun mapListOfRadiosByCategories(list: List<RadioModel>): MutableMap<String, ArrayList<RadioModel>> {
-        return withContext(Dispatchers.Default) {
-            mutableMapOf<String, ArrayList<RadioModel>>().also { items ->
-                list.forEach { radioModel ->
-                    if (items.containsKey(radioModel.category)) {
-                        if (items[radioModel.category]?.contains(radioModel) == false) {
-                            items[radioModel.category]?.add(radioModel)
+    fun addOrRemoveRadioStationFromFavorites(radioModel: RadioModel) {
+        viewModelScope.launch {
+            if (_radioStationsUiState.value is RadioStationsUiState.Success) {
+
+                val state = (_radioStationsUiState.value as RadioStationsUiState.Success)
+
+                val hasBeenAddedOrRemovedSuccessfully = favoriteUseCase.addOrRemoveRadioStationFromFavorites(radioModel.copy(
+                    isFavorite = !radioModel.isFavorite
+                ))
+
+                if (hasBeenAddedOrRemovedSuccessfully) {
+
+                    mutableMapOf<String, MutableList<RadioModel>>().apply {
+
+                        putAll(
+                            state.listRadioStations.map { item ->
+                                Pair(item.key, item.value.map { it.copy() }.toMutableList())
+                            }
+                        )
+
+                        forEach { item ->
+                            if (item.key == radioModel.category) {
+                                item.value.forEach {
+                                    if (it.id == radioModel.id) {
+                                        it.isFavorite = !it.isFavorite
+                                    }
+                                }
+                            }
                         }
-                    } else {
-                        items[radioModel.category] = arrayListOf(radioModel)
+
+                        _radioStationsUiState.value = state.copy(listRadioStations = this)
                     }
                 }
             }

@@ -3,16 +3,16 @@ package br.com.gms.radiosonline.presentation.screens.playing_now
 import android.support.v4.media.MediaBrowserCompat
 import android.support.v4.media.MediaMetadataCompat
 import android.support.v4.media.session.PlaybackStateCompat
-import android.util.Log
 import androidx.lifecycle.*
-import br.com.gms.radiosonline.data.model.ResultModel
+import br.com.gms.radiosonline.data.model.remote.ResultModel
 import br.com.gms.radiosonline.domain.model.RadioModel
-import br.com.gms.radiosonline.domain.usercase.RadioStationsUserCase
+import br.com.gms.radiosonline.domain.usecase.RadioStationsFavoritesUseCase
+import br.com.gms.radiosonline.domain.usecase.RadioStationsListUseCase
 import br.com.gms.radiosonline.mediaplayer.MediaPlayerServiceConnection
 import br.com.gms.radiosonline.mediaplayer.extractRadioModel
 import br.com.gms.radiosonline.presentation.navigation.radioIdParam
+import br.com.gms.radiosonline.presentation.screens.radio_stations.RadioStationsUiState
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
@@ -22,9 +22,11 @@ import javax.inject.Inject
 @HiltViewModel
 class PlayingNowViewModel @Inject constructor(
     private val state: SavedStateHandle,
-    private val userCase: RadioStationsUserCase,
-    private val serviceConnection: MediaPlayerServiceConnection
+    private val userCase: RadioStationsListUseCase,
+    private val favoritesUseCase: RadioStationsFavoritesUseCase,
+    private val serviceConnection: MediaPlayerServiceConnection,
 ) : ViewModel() {
+
 
     private var _radioId: String? = null
     private var _currentMediaId: String? = null
@@ -98,6 +100,24 @@ class PlayingNowViewModel @Inject constructor(
                             }
                         }
                     }
+            }
+        }
+    }
+
+
+    fun addOrRemoveRadioStationFromFavorites(radioModel: RadioModel) {
+        viewModelScope.launch {
+            if (_playingNowUiState.value is PlayingNowUiState.Success) {
+
+                val state = (_playingNowUiState.value as PlayingNowUiState.Success)
+                val radioStation = radioModel.copy(isFavorite = !radioModel.isFavorite)
+                val hasBeenAddedOrRemovedSuccessfully = favoritesUseCase.addOrRemoveRadioStationFromFavorites(radioStation)
+
+                if (hasBeenAddedOrRemovedSuccessfully) {
+                    _playingNowUiState.value = state.copy(
+                        radioStation = radioStation
+                    )
+                }
             }
         }
     }

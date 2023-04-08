@@ -31,4 +31,8 @@
     <string name="close">Fechar</string>
     <string name="radio_logo">Logo da rádio</string>
     <string name="share">Compartilhar</string>
+    <string name="attention">Atenção</string>
+    <string name="you_have_not_yet_added_any_radios_to_your_favorites">Você ainda não adicionou nenhuma rádio aos seus favoritos.</string>
+    <string name="really_want_to_remove_this_radio_from_your_favorites_list">Realmente deseja remover esta rádio da sua lista de favoritos ?</string>
+    <string name="yes">Sim</string>
 </resources>
