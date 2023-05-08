@@ -211,30 +211,6 @@ fun PlayingNowContent(
 
                                 Spacer(modifier = Modifier.width(DefaultPaddingMin))
 
-
-                                with(playbackState?.state == PlaybackStateCompat.STATE_PLAYING) {
-                                    IconButton(
-                                        enabled = this,
-                                        modifier = Modifier.size(50.dp),
-                                        onClick = {
-                                            viewModel.skipToPrevious()
-                                        }
-                                    ) {
-                                        Icon(
-                                            painter = painterResource(id = R.drawable.ic_skip_previous),
-                                            contentDescription = stringResource(
-                                                id = R.string.previous,
-                                                radio.name
-                                            ),
-                                            tint = if (this) MaterialTheme.colors.secondary else MaterialTheme.colors.secondaryVariant,
-                                            modifier = Modifier.size(38.dp)
-                                        )
-                                    }
-
-                                }
-
-                                Spacer(modifier = Modifier.width(DefaultPaddingMin))
-
                                 when (playbackState?.state) {
                                     PlaybackStateCompat.STATE_BUFFERING -> {
                                         LottieAnimation(
@@ -291,30 +267,6 @@ fun PlayingNowContent(
                                                         viewModel.play(it)
                                                     }
                                                 },
-                                        )
-                                    }
-                                }
-
-                                Spacer(modifier = Modifier.width(DefaultPaddingMin))
-
-                                with(playbackState?.state == PlaybackStateCompat.STATE_PLAYING) {
-                                    IconButton(
-                                        enabled = this,
-                                        modifier = Modifier.size(50.dp),
-                                        onClick = {
-                                            viewModel.skipToNext()
-                                        }
-                                    ) {
-
-                                        Icon(
-                                            painter = painterResource(id = R.drawable.ic_skip_next),
-                                            contentDescription = stringResource(
-                                                id = R.string.share,
-                                                radio.name
-                                            ),
-                                            tint = if (this) MaterialTheme.colors.secondary else MaterialTheme.colors.secondaryVariant,
-                                            modifier = Modifier
-                                                .size(38.dp)
                                         )
                                     }
                                 }

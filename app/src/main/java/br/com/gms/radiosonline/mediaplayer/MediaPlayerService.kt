@@ -6,7 +6,6 @@ import android.media.AudioAttributes
 import android.media.AudioFocusRequest
 import android.media.AudioManager
 import android.media.session.PlaybackState
-import android.net.Uri
 import android.os.Build
 import android.os.Bundle
 import android.support.v4.media.MediaBrowserCompat
@@ -66,19 +65,9 @@ class MediaPlayerService : MediaBrowserServiceCompat(), MediaPlayerNotificationL
 
     private val mediaSessionCallback = object : MediaSessionCompat.Callback() {
 
-        override fun onPlayFromUri(uri: Uri?, extras: Bundle?) {
-            super.onPlayFromUri(uri, extras)
-            playFromUri(uri)
-        }
-
-        override fun onPlayFromSearch(query: String?, extras: Bundle?) {
-            super.onPlayFromSearch(query, extras)
-            playFromSearch(query)
-        }
-
         override fun onPlayFromMediaId(mediaId: String?, extras: Bundle?) {
             super.onPlayFromMediaId(mediaId, extras)
-            playFromMediaId(mediaId)
+            findFromMediaId(mediaId)
         }
 
         override fun onPause() {
@@ -95,22 +84,12 @@ class MediaPlayerService : MediaBrowserServiceCompat(), MediaPlayerNotificationL
             super.onPlay()
             play()
         }
-
-        override fun onSkipToNext() {
-            super.onSkipToNext()
-            skipToNext()
-        }
-
-        override fun onSkipToPrevious() {
-            super.onSkipToPrevious()
-            skipToPrevious()
-        }
-
     }
 
     override fun onCreate() {
         super.onCreate()
         initializePlayer()
+        initializeMediaSource()
         initializeMediaSession()
         initializeAudioManager()
         initializeNotificationManger()
@@ -137,7 +116,9 @@ class MediaPlayerService : MediaBrowserServiceCompat(), MediaPlayerNotificationL
         result.detach()
         when (parentId) {
             ROOT_ID -> {
-                result.sendResult(mediaSource.radioStationsMediaItem.value)
+                mediaSource.radioStationsMediaItem.value?.let {
+                    result.sendResult(mutableListOf(it))
+                }
             }
             else -> Unit
         }
@@ -145,12 +126,13 @@ class MediaPlayerService : MediaBrowserServiceCompat(), MediaPlayerNotificationL
 
     override fun onCustomAction(action: String, extras: Bundle?, result: Result<Bundle>) {
         super.onCustomAction(action, extras, result)
-        if (action == ROOT_ID){
+        if (action == ROOT_ID) {
             notifyChildrenChanged(ROOT_ID)
         }
     }
 
-    private fun initializePlayer(){
+
+    private fun initializePlayer() {
         playerIsRelease = false
         exoPlayer = ExoPlayer.Builder(this)
             .build()
@@ -161,18 +143,19 @@ class MediaPlayerService : MediaBrowserServiceCompat(), MediaPlayerNotificationL
 
                     override fun onPlaybackStateChanged(playbackState: Int) {
                         super.onPlaybackStateChanged(playbackState)
-                        if (playbackState == PlaybackStateCompat.STATE_PLAYING){
+                        if (playbackState == PlaybackStateCompat.STATE_PLAYING) {
                             updatePlaybackState(playbackState)
                         }
                     }
 
                     override fun onPlayerError(error: PlaybackException) {
 
-                        val message = if (error.errorCode == PlaybackException.ERROR_CODE_IO_FILE_NOT_FOUND) {
-                            R.string.error_media_not_found
-                        } else {
-                            R.string.generic_error
-                        }
+                        val message =
+                            if (error.errorCode == PlaybackException.ERROR_CODE_IO_FILE_NOT_FOUND) {
+                                R.string.error_media_not_found
+                            } else {
+                                R.string.generic_error
+                            }
 
                         Toast.makeText(applicationContext, message, Toast.LENGTH_SHORT).show()
                         updatePlaybackState(PlaybackStateCompat.STATE_ERROR)
@@ -181,7 +164,16 @@ class MediaPlayerService : MediaBrowserServiceCompat(), MediaPlayerNotificationL
             }
     }
 
-    private fun initializeAudioManager(){
+    private fun initializeMediaSource() {
+        serviceScope.launch {
+            mediaSource.radioStationsMediaItem.collect {
+                notifyChildrenChanged(ROOT_ID)
+                play()
+            }
+        }
+    }
+
+    private fun initializeAudioManager() {
         audioManager = getSystemService(AUDIO_SERVICE) as AudioManager
 
         audioFocusListener = AudioManager.OnAudioFocusChangeListener { focusChange ->
@@ -199,7 +191,7 @@ class MediaPlayerService : MediaBrowserServiceCompat(), MediaPlayerNotificationL
             }
         }
 
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O){
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             audioFocusRequest = AudioFocusRequest.Builder(AudioManager.AUDIOFOCUS_GAIN).run {
                 setAudioAttributes(AudioAttributes.Builder().run {
                     setContentType(AudioAttributes.CONTENT_TYPE_MUSIC)
@@ -214,25 +206,19 @@ class MediaPlayerService : MediaBrowserServiceCompat(), MediaPlayerNotificationL
     }
 
     private fun initializeMediaSession() {
-        serviceScope.launch {
-            mediaSource.load()
-            mediaSource.radioStationsMediaItem.collect {
-                notifyChildrenChanged(ROOT_ID)
-            }
-        }
-
         playbackState = PlaybackStateCompat.Builder().setActions(
             buildAllowedActions()
         )
 
-        val sessionActivityPendingIntent = packageManager?.getLaunchIntentForPackage(packageName)?.let { sessionIntent ->
-            PendingIntent.getActivity(
-                this,
-                0,
-                sessionIntent,
-                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
-            )
-        }
+        val sessionActivityPendingIntent =
+            packageManager?.getLaunchIntentForPackage(packageName)?.let { sessionIntent ->
+                PendingIntent.getActivity(
+                    this,
+                    0,
+                    sessionIntent,
+                    PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+                )
+            }
 
         mediaSession = MediaSessionCompat(this, packageName).apply {
             setSessionActivity(sessionActivityPendingIntent)
@@ -245,24 +231,20 @@ class MediaPlayerService : MediaBrowserServiceCompat(), MediaPlayerNotificationL
 
     }
 
-    private fun initializeNotificationManger(){
-       notificationManager = MediaPlayerNotificationManager(
-           this,
-           mediaSession.controller.sessionActivity,
-           this,
-       )
-   }
+    private fun initializeNotificationManger() {
+        notificationManager = MediaPlayerNotificationManager(
+            this,
+            mediaSession.controller.sessionActivity,
+            this,
+        )
+    }
 
     private fun buildAllowedActions(actionOnRemove: List<Long>? = null): Long {
-       val actions = arrayListOf(
+        val actions = arrayListOf(
             PlaybackStateCompat.ACTION_PLAY,
             PlaybackStateCompat.ACTION_STOP,
             PlaybackStateCompat.ACTION_PAUSE,
             PlaybackStateCompat.ACTION_PLAY_PAUSE,
-            PlaybackStateCompat.ACTION_SKIP_TO_NEXT,
-            PlaybackStateCompat.ACTION_PLAY_FROM_URI,
-            PlaybackStateCompat.ACTION_SKIP_TO_PREVIOUS,
-            PlaybackStateCompat.ACTION_PLAY_FROM_SEARCH,
             PlaybackStateCompat.ACTION_PLAY_FROM_MEDIA_ID,
         )
 
@@ -271,8 +253,16 @@ class MediaPlayerService : MediaBrowserServiceCompat(), MediaPlayerNotificationL
         return actions.reduce { acc, action -> (acc or action) }
     }
 
+    private fun findFromMediaId(mediaId: String?) {
+        serviceScope.launch {
+            mediaId?.let {
+                mediaSource.findFromMediaId(it)
+            }
+        }
+    }
+
     private fun play() {
-        val result =  if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+        val result = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             audioManager.requestAudioFocus(audioFocusRequest)
         } else {
             audioManager.requestAudioFocus(
@@ -284,14 +274,11 @@ class MediaPlayerService : MediaBrowserServiceCompat(), MediaPlayerNotificationL
 
         if (result == AudioManager.AUDIOFOCUS_REQUEST_GRANTED) {
 
-            if (playerIsRelease){
+            if (playerIsRelease) {
                 initializePlayer()
             }
 
-            val indexToPlay = if (radioToPlay == null) 0 else mediaSource.indexOf(radioToPlay)
-
             exoPlayer.setMediaSource(mediaSource.buildMediaSource(dataSourceFactory))
-            exoPlayer.seekTo(indexToPlay , 0)
             exoPlayer.prepare()
             exoPlayer.playWhenReady = true
 
@@ -300,26 +287,6 @@ class MediaPlayerService : MediaBrowserServiceCompat(), MediaPlayerNotificationL
         }
     }
 
-    private fun playFromUri(uri: Uri?) {
-        uri?.let {
-            radioToPlay = mediaSource.findFromUri(it)
-            play()
-        }
-    }
-
-    private fun playFromSearch(query: String?) {
-        query?.let { _query ->
-            radioToPlay = mediaSource.search(_query)
-            play()
-        }
-    }
-
-    private fun playFromMediaId(mediaId: String?) {
-        mediaId?.let {
-            radioToPlay = mediaSource.findFromMediaId(it)
-            play()
-        }
-    }
 
     private fun pause() {
         if (exoPlayer.playbackState == PlaybackStateCompat.STATE_PLAYING ||
@@ -333,9 +300,9 @@ class MediaPlayerService : MediaBrowserServiceCompat(), MediaPlayerNotificationL
     }
 
     private fun stop() {
-        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O){
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
             audioManager.abandonAudioFocusRequest(audioFocusRequest)
-        }else {
+        } else {
             audioManager.abandonAudioFocus(audioFocusListener)
         }
 
@@ -358,33 +325,13 @@ class MediaPlayerService : MediaBrowserServiceCompat(), MediaPlayerNotificationL
 
     }
 
-    private fun clearSession(){
+    private fun clearSession() {
         mediaSession.isActive = false
         mediaSession.release()
     }
 
-    private fun skipToNext() {
-        if (exoPlayer.hasNextMediaItem()){
-            exoPlayer.seekToNext()
-            updateCurrentMediaItem()
-            updatePlaybackState(PlaybackStateCompat.STATE_BUFFERING)
-        }
-    }
-
-    private fun skipToPrevious() {
-        if (exoPlayer.hasPreviousMediaItem()){
-            exoPlayer.seekToPrevious()
-            updateCurrentMediaItem()
-            updatePlaybackState(PlaybackStateCompat.STATE_BUFFERING)
-        }
-    }
-
-    override fun onSearch(query: String, extras: Bundle?, result: Result<List<MediaBrowserCompat.MediaItem>>) {
-        result.sendResult(mediaSource.filter(query))
-    }
-
     private fun updateCurrentMediaItem() {
-        mediaSource.findIndex(exoPlayer.currentMediaItemIndex)?.let {
+        mediaSource.radioStationMetaData?.let {
             radioToPlay = it
             mediaSession.setMetadata(it)
             notificationManager.sendNotification(it, exoPlayer)
@@ -392,21 +339,12 @@ class MediaPlayerService : MediaBrowserServiceCompat(), MediaPlayerNotificationL
     }
 
     private fun updatePlaybackState(state: Int) {
-        val allowedActions =  when (state) {
+        val allowedActions = when (state) {
             PlaybackStateCompat.STATE_BUFFERING,
             PlaybackStateCompat.STATE_PLAYING -> {
                 val actionOnRemove = arrayListOf(
                     PlaybackStateCompat.ACTION_PLAY,
                 )
-
-                if (!exoPlayer.hasNextMediaItem()) {
-                    actionOnRemove.add(PlaybackStateCompat.ACTION_SKIP_TO_NEXT)
-                }
-
-                if (!exoPlayer.hasPreviousMediaItem()) {
-                    actionOnRemove.add(PlaybackStateCompat.ACTION_SKIP_TO_PREVIOUS)
-                }
-
                 buildAllowedActions(actionOnRemove)
             }
             PlaybackStateCompat.STATE_NONE,
@@ -417,8 +355,6 @@ class MediaPlayerService : MediaBrowserServiceCompat(), MediaPlayerNotificationL
                 val actionOnRemove = listOf(
                     PlaybackStateCompat.ACTION_STOP,
                     PlaybackStateCompat.ACTION_PAUSE,
-                    PlaybackStateCompat.ACTION_SKIP_TO_NEXT,
-                    PlaybackStateCompat.ACTION_SKIP_TO_PREVIOUS,
                 )
 
                 buildAllowedActions(actionOnRemove)
@@ -440,7 +376,7 @@ class MediaPlayerService : MediaBrowserServiceCompat(), MediaPlayerNotificationL
     }
 
     override fun onNotificationPosted(notificationId: Int, notification: Notification) {
-        if (serviceIsRunning.not()){
+        if (serviceIsRunning.not()) {
             serviceIsRunning = true
             startForeground(notificationId, notification)
         }

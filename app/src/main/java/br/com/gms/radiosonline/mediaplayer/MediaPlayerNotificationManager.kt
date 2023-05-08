@@ -101,14 +101,6 @@ internal class MediaPlayerNotificationManager(
             setOnClickPendingIntent(R.id.notification_container, pendingIntent)
 
             setImageViewResource(
-                R.id.content_previous, if (player.hasPreviousMediaItem()) {
-                    R.drawable.ic_skip_previous
-                } else {
-                    R.drawable.ic_skip_previous_disable
-                }
-            )
-
-            setImageViewResource(
                 R.id.content_play_pause, if (player.playWhenReady) {
                     R.drawable.ic_play_circle
                 } else {
@@ -116,32 +108,10 @@ internal class MediaPlayerNotificationManager(
                 }
             )
 
-            setImageViewResource(
-                R.id.content_next, if (player.hasNextMediaItem()) {
-                    R.drawable.ic_skip_next
-                } else {
-                    R.drawable.ic_skip_next_disable
-                }
-            )
-
-            setOnClickPendingIntent(
-                R.id.content_previous, MediaButtonReceiver.buildMediaButtonPendingIntent(
-                    context,
-                    PlaybackStateCompat.ACTION_SKIP_TO_PREVIOUS
-                )
-            )
-
             setOnClickPendingIntent(
                 R.id.content_play_pause, MediaButtonReceiver.buildMediaButtonPendingIntent(
                     context,
                     PlaybackStateCompat.ACTION_PLAY_PAUSE
-                )
-            )
-
-            setOnClickPendingIntent(
-                R.id.content_next, MediaButtonReceiver.buildMediaButtonPendingIntent(
-                    context,
-                    PlaybackStateCompat.ACTION_SKIP_TO_NEXT
                 )
             )
 

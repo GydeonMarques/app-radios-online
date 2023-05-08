@@ -3,6 +3,7 @@ package br.com.gms.radiosonline.presentation.screens.playing_now
 import android.support.v4.media.MediaBrowserCompat
 import android.support.v4.media.MediaMetadataCompat
 import android.support.v4.media.session.PlaybackStateCompat
+import android.util.Log
 import androidx.lifecycle.*
 import br.com.gms.radiosonline.data.model.remote.ResultModel
 import br.com.gms.radiosonline.domain.model.RadioModel
@@ -46,8 +47,10 @@ class PlayingNowViewModel @Inject constructor(
             super.onChildrenLoaded(parentId, items)
             _mediaItems = items.map { it.description.extractRadioModel() }.toMutableList()
             _playbackState.value = serviceConnection.mediaController.playbackState
-            _radioId = state.get<String>(radioIdParam)
-            updateTheCurrentPlaybackMediaOrStartANewPlayback()
+            state.get<String>(radioIdParam)?.let {
+                _radioId = it
+                updateTheCurrentPlaybackMediaOrStartANewPlayback()
+            }
         }
     }
 
@@ -65,6 +68,11 @@ class PlayingNowViewModel @Inject constructor(
         serviceConnection.currentPlayingMedia.observeForever(currentMediaMetadataObserver)
         serviceConnection.playbackStateCompat.observeForever(playbackStateObserver)
         serviceConnection.subscribe(subscriptionCallback)
+
+        state.get<String>(radioIdParam)?.let {
+            _radioId = it
+            updateTheCurrentPlaybackMediaOrStartANewPlayback()
+        }
     }
 
     fun play(radioModel: RadioModel) {
@@ -73,14 +81,6 @@ class PlayingNowViewModel @Inject constructor(
 
     fun pause() {
         serviceConnection.pause()
-    }
-
-    fun skipToNext() {
-        serviceConnection.skipToNext()
-    }
-
-    fun skipToPrevious() {
-        serviceConnection.skipToPrevious()
     }
 
     private fun getRadioStationById() {

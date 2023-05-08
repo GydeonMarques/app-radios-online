@@ -6,6 +6,7 @@ import br.com.gms.radiosonline.data.model.remote.ResultModel
 import br.com.gms.radiosonline.data.repository.local.LocalRadioStationsRepository
 import br.com.gms.radiosonline.domain.model.RadioCategoryModel
 import br.com.gms.radiosonline.domain.model.RadioModel
+import com.google.firebase.firestore.Query
 import com.google.firebase.firestore.ktx.firestore
 import com.google.firebase.ktx.Firebase
 import kotlinx.coroutines.channels.awaitClose
@@ -51,24 +52,31 @@ class FirebaseRadioStationsRepositoryImpl @Inject constructor(
         }
     }
 
-    override suspend fun getRadioStations(): Flow<ResultModel<List<RadioModel>>> {
+    override suspend fun getRadioStations(category: String): Flow<ResultModel<List<RadioModel>>> {
         return callbackFlow {
             try {
-                Firebase.firestore.collection(RADIO_STATIONS_COLLECTION_NAME).also {
-                    val subscription = it.addSnapshotListener { snapshot, error ->
-                        snapshot?.let {
-                            snapshot.documents
-                                .map { doc -> doc.toModel() }
-                                .apply {
-                                    trySend(ResultModel.Success(this))
-                                }
-                        } ?: error?.let {
-                            trySend(ResultModel.Failure(error))
-                        }
-                    }
 
-                    awaitClose { subscription.remove() }
+                var query: Query? = null
+                val collection = Firebase.firestore.collection(RADIO_STATIONS_COLLECTION_NAME)
+
+                if (category.isNotEmpty()) {
+                    query = collection.whereIn(FILTER_FIELD_NAME, listOf(category))
                 }
+
+                val subscription = (query ?: collection).addSnapshotListener { snapshot, error ->
+                    snapshot?.let {
+                        snapshot.documents
+                            .map { doc -> doc.toModel() }
+                            .apply {
+                                trySend(ResultModel.Success(this))
+                            }
+                    } ?: error?.let {
+                        trySend(ResultModel.Failure(error))
+                    }
+                }
+
+                awaitClose { subscription.remove() }
+
             } catch (e: Throwable) {
                 trySend(ResultModel.Failure(e))
                 close(e)
@@ -76,12 +84,14 @@ class FirebaseRadioStationsRepositoryImpl @Inject constructor(
         }.checkFavoriteItems()
     }
 
-    override suspend fun searchRadioStations(text: String): Flow<ResultModel<List<RadioModel>>> {
-        return if (text.isEmpty()){
-            getRadioStations()
-        } else callbackFlow {
+    override suspend fun searchRadioStations(
+        category: String,
+        text: String
+    ): Flow<ResultModel<List<RadioModel>>> {
+        return callbackFlow {
             try {
                 Firebase.firestore.collection(RADIO_STATIONS_COLLECTION_NAME)
+                    .whereIn(FILTER_FIELD_NAME, listOf(category))
                     .also {
                         val subscription = it.addSnapshotListener { snapshot, error ->
                             snapshot?.let {
