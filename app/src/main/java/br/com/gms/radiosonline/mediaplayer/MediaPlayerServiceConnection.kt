@@ -103,22 +103,6 @@ class MediaPlayerServiceConnection @Inject constructor(
         mediaController.transportControls.stop()
     }
 
-    fun skipToNext() {
-        mediaController.transportControls.skipToNext()
-    }
-
-    fun skipToPrevious() {
-        mediaController.transportControls.skipToPrevious()
-    }
-
-    fun loadMediaItems() {
-        mediaBrowser.sendCustomAction(
-            MediaPlayerService.ROOT_ID,
-            null,
-            null
-        )
-    }
-
     fun subscribe(callback: MediaBrowserCompat.SubscriptionCallback) {
         mediaBrowser.subscribe(MediaPlayerService.ROOT_ID, callback)
     }

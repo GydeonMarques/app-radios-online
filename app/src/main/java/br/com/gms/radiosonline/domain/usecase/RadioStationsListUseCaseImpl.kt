@@ -30,9 +30,9 @@ class RadioStationsListUseCaseImpl @Inject constructor(
     }
 
 
-    override suspend fun getRadioStations(): Flow<ResultModel<List<RadioModel>>> {
+    override suspend fun getRadioStations(category: String): Flow<ResultModel<List<RadioModel>>> {
         return withContext(dispatcher) {
-            remoteRadioStationsRepository.getRadioStations()
+            remoteRadioStationsRepository.getRadioStations(category)
                 .map { result ->
                     when (result) {
                         is ResultModel.Failure -> result
@@ -42,9 +42,9 @@ class RadioStationsListUseCaseImpl @Inject constructor(
         }
     }
 
-    override suspend fun searchRadioStations(text: String): Flow<ResultModel<List<RadioModel>>> {
+    override suspend fun searchRadioStations(category: String, text: String): Flow<ResultModel<List<RadioModel>>> {
         return withContext(dispatcher) {
-            remoteRadioStationsRepository.searchRadioStations(text)
+            remoteRadioStationsRepository.searchRadioStations(category, text)
                 .map { result ->
                     when (result) {
                         is ResultModel.Failure -> result
