@@ -31,7 +31,7 @@ class PlayingNowViewModel @Inject constructor(
 
     private var _radioId: String? = null
     private var _currentMediaId: String? = null
-    private var _mediaItems: MutableList<RadioModel?> = mutableListOf()
+    private var _currentMediaItem: RadioModel? = null
 
     private val _currentPlayingMedia: MutableLiveData<RadioModel?> = MutableLiveData()
     val currentPlayingMedia: LiveData<RadioModel?> get() = _currentPlayingMedia
@@ -45,17 +45,14 @@ class PlayingNowViewModel @Inject constructor(
     private val subscriptionCallback = object : MediaBrowserCompat.SubscriptionCallback() {
         override fun onChildrenLoaded(parentId: String, items: MutableList<MediaBrowserCompat.MediaItem>) {
             super.onChildrenLoaded(parentId, items)
-            _mediaItems = items.map { it.description.extractRadioModel() }.toMutableList()
+            _currentMediaItem = items.map { it.description.extractRadioModel() }.firstOrNull()
             _playbackState.value = serviceConnection.mediaController.playbackState
-            state.get<String>(radioIdParam)?.let {
-                _radioId = it
-                updateTheCurrentPlaybackMediaOrStartANewPlayback()
-            }
+            _currentMediaId = _currentMediaItem?.id
+            updateTheCurrentPlaybackMediaOrStartANewPlayback()
         }
     }
 
     private val currentMediaMetadataObserver = Observer<MediaMetadataCompat?> {
-        _radioId = null
         _currentMediaId = it?.description?.mediaId
         updateTheCurrentPlaybackMediaOrStartANewPlayback()
     }
@@ -68,11 +65,7 @@ class PlayingNowViewModel @Inject constructor(
         serviceConnection.currentPlayingMedia.observeForever(currentMediaMetadataObserver)
         serviceConnection.playbackStateCompat.observeForever(playbackStateObserver)
         serviceConnection.subscribe(subscriptionCallback)
-
-        state.get<String>(radioIdParam)?.let {
-            _radioId = it
-            updateTheCurrentPlaybackMediaOrStartANewPlayback()
-        }
+        _radioId = state.get<String>(radioIdParam)
     }
 
     fun play(radioModel: RadioModel) {
@@ -124,13 +117,11 @@ class PlayingNowViewModel @Inject constructor(
 
     private fun updateTheCurrentPlaybackMediaOrStartANewPlayback() {
         viewModelScope.launch {
-            if (_radioId == null || _radioId == _currentMediaId) {
-                _mediaItems.find { it?.id == _currentMediaId }.also { radioModel ->
-                    _currentPlayingMedia.value = radioModel
-                    if (radioModel != null) {
-                        _playingNowUiState.update {
-                            PlayingNowUiState.Success(radioStation = radioModel)
-                        }
+            if (_radioId == null || (_currentMediaId != null && _radioId == _currentMediaId)) {
+                _currentMediaItem?.let { _radioModel ->
+                    _currentPlayingMedia.value = _radioModel
+                    _playingNowUiState.update {
+                        PlayingNowUiState.Success(radioStation = _radioModel)
                     }
                 }
             } else {

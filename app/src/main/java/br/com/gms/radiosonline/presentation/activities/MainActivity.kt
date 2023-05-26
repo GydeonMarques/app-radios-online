@@ -7,8 +7,17 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.material.*
-import androidx.compose.runtime.*
+import androidx.compose.material.FabPosition
+import androidx.compose.material.FloatingActionButton
+import androidx.compose.material.Icon
+import androidx.compose.material.MaterialTheme
+import androidx.compose.material.Scaffold
+import androidx.compose.material.Surface
+import androidx.compose.runtime.Composable
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.platform.LocalContext
@@ -24,13 +33,25 @@ import br.com.gms.radiosonline.presentation.components.BottomAppBarItem
 import br.com.gms.radiosonline.presentation.components.CustomBottomAppBar
 import br.com.gms.radiosonline.presentation.components.CustomTopAppBar
 import br.com.gms.radiosonline.presentation.components.bottomAppBarItems
-import br.com.gms.radiosonline.presentation.navigation.*
+import br.com.gms.radiosonline.presentation.navigation.RadioOnlineNavHost
+import br.com.gms.radiosonline.presentation.navigation.favoritesRoute
+import br.com.gms.radiosonline.presentation.navigation.navigateToFavorites
+import br.com.gms.radiosonline.presentation.navigation.navigateToPlayingNow
+import br.com.gms.radiosonline.presentation.navigation.navigateToRadioStations
+import br.com.gms.radiosonline.presentation.navigation.playingNowRoute
+import br.com.gms.radiosonline.presentation.navigation.radioStationsRoute
+import br.com.gms.radiosonline.presentation.screens.radio_stations.RadioStationsViewModelFactory
 import br.com.gms.radiosonline.presentation.theme.RadiosOnlineTheme
 import br.com.gms.radiosonline.presentation.theme.SystemUi
 import dagger.hilt.android.AndroidEntryPoint
+import javax.inject.Inject
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
+
+    @Inject
+    lateinit var viewModelFactory: RadioStationsViewModelFactory
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
@@ -40,7 +61,7 @@ class MainActivity : ComponentActivity() {
                     color = MaterialTheme.colors.background
                 ) {
                     SystemUi(window)
-                    MainContent()
+                    MainContent(viewModelFactory)
                 }
             }
         }
@@ -48,7 +69,7 @@ class MainActivity : ComponentActivity() {
 }
 
 @Composable
-fun MainContent() {
+fun MainContent(viewModelFactory: RadioStationsViewModelFactory) {
 
     val radioStations = stringResource(id = R.string.radio_stations)
     var toolbarTitle by remember { mutableStateOf(radioStations) }
@@ -136,15 +157,10 @@ fun MainContent() {
         },
     ) {
         Box(modifier = Modifier.padding(it)) {
-            RadioOnlineNavHost(navController = navController)
+            RadioOnlineNavHost(
+                navController = navController,
+                viewModelFactory = viewModelFactory
+            )
         }
-    }
-}
-
-@Preview(showBackground = true, showSystemUi = true)
-@Composable
-private fun RadiosOnlineAppPreview() {
-    RadiosOnlineTheme {
-        MainContent()
     }
 }

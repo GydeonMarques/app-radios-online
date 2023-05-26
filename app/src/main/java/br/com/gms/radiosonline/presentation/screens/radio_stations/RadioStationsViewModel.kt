@@ -7,6 +7,9 @@ import br.com.gms.radiosonline.domain.model.RadioModel
 import br.com.gms.radiosonline.domain.usecase.RadioStationsFavoritesUseCase
 import br.com.gms.radiosonline.domain.usecase.RadioStationsListUseCase
 import dagger.hilt.android.lifecycle.HiltViewModel
+import dagger.hilt.android.scopes.ViewModelScoped
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
@@ -20,7 +23,7 @@ class RadioStationsViewModel @Inject constructor(
 ) : ViewModel() {
 
     private var category: String = ""
-    private var searchTimeout = System.currentTimeMillis()
+    private var searchJob: Job? = null
 
     private var _radioStationsUiState = MutableStateFlow<RadioStationsUiState>(RadioStationsUiState.Loading)
     val radioStationsUiState: StateFlow<RadioStationsUiState> get() = _radioStationsUiState
@@ -72,24 +75,24 @@ class RadioStationsViewModel @Inject constructor(
     }
 
     fun searchRadioStations(text: String) {
-        if ((System.currentTimeMillis() - searchTimeout) >= 500 || text.isEmpty()) {
-            searchTimeout = System.currentTimeMillis()
-            viewModelScope.launch {
-                useCase.searchRadioStations(category, text).collect { response ->
-                    when (response) {
-                        is ResultModel.Failure -> _radioStationsUiState.update {
-                            RadioStationsUiState.Failure(response.throwable)
-                        }
-                        is ResultModel.Success -> _radioStationsUiState.update {
-                            RadioStationsUiState.Success(
-                                topRadiosStations = response.data.filter { r -> r.topRadio },
-                                listRadioStations = response.data.groupBy { it.category }
-                            )
-                        }
+        searchJob?.cancel()
+        searchJob = viewModelScope.launch {
+            delay(500)
+            useCase.searchRadioStations(category, text).collect { response ->
+                when (response) {
+                    is ResultModel.Failure -> _radioStationsUiState.update {
+                        RadioStationsUiState.Failure(response.throwable)
+                    }
+
+                    is ResultModel.Success -> _radioStationsUiState.update {
+                        RadioStationsUiState.Success(
+                            topRadiosStations = response.data.filter { r -> r.topRadio },
+                            listRadioStations = response.data.groupBy { it.category }
+                        )
                     }
                 }
             }
-        } else return
+        }
     }
 
     fun addOrRemoveRadioStationFromFavorites(radioModel: RadioModel) {

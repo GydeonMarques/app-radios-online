@@ -54,8 +54,8 @@ fun RadioStationsScreen(
         }
         is RadioStationsUiState.Success -> {
 
-            val listRadioStations = (radioUiState as RadioStationsUiState.Success).listRadioStations
             val topRadioStations = (radioUiState as RadioStationsUiState.Success).topRadiosStations
+            val listRadioStations = (radioUiState as RadioStationsUiState.Success).listRadioStations
 
             Column {
 
@@ -156,9 +156,7 @@ fun RadioStationsScreen(
                                         onRadioNavigationToPlayer(radioModel.id)
                                     },
                                     addOrRemoveFromFavorites = {
-                                        viewModel.addOrRemoveRadioStationFromFavorites(
-                                            it
-                                        )
+                                        viewModel.addOrRemoveRadioStationFromFavorites(it)
                                     }
                                 )
                             }
