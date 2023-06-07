@@ -9,6 +9,7 @@ import androidx.compose.material.ScrollableTabRow
 import androidx.compose.material.Tab
 import androidx.compose.material.TabRowDefaults
 import androidx.compose.material.Text
+import androidx.compose.material.primarySurface
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -63,6 +64,7 @@ fun RadioStationsTabScreen(
                         modifier = Modifier.fillMaxWidth(),
                         selectedTabIndex = selectedTabIndex,
                         edgePadding = TabRowDefaults.DividerThickness,
+                        backgroundColor = MaterialTheme.colors.background,
                     ) {
                         categories.forEachIndexed { index, title ->
                             Tab(

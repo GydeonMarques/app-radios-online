@@ -51,7 +51,7 @@ fun UiViewState(
 
 @Preview(showBackground = true, showSystemUi = true)
 @Composable
-private fun ViewStatePreview() {
+private fun UiViewStatePreview() {
     RadiosOnlineTheme {
         UiViewState(
             icon = LottieCompositionSpec.RawRes(br.com.gms.radiosonline.R.raw.ic_radio),
