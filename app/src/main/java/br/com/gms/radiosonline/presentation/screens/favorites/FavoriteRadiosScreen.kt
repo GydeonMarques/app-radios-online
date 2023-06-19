@@ -5,6 +5,7 @@ import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Search
@@ -20,6 +21,8 @@ import br.com.gms.radiosonline.presentation.components.CustomDialog
 import br.com.gms.radiosonline.presentation.components.RadioItem
 import br.com.gms.radiosonline.presentation.components.UiViewState
 import br.com.gms.radiosonline.presentation.theme.DefaultPadding
+import br.com.gms.radiosonline.presentation.theme.DefaultRadius
+import br.com.gms.radiosonline.presentation.theme.DefaultRadiusMin
 import br.com.gms.radiosonline.presentation.theme.GrayLight
 import com.airbnb.lottie.compose.LottieCompositionSpec
 
@@ -101,6 +104,7 @@ fun FavoritesRadiosScreen(
                                 end = DefaultPadding,
                                 start = DefaultPadding
                             ),
+                        shape = RoundedCornerShape(DefaultRadiusMin),
                         onValueChange = {
                             searchText = it
                             viewModel.searchFavoriteRadioStations(it)
