@@ -1,33 +1,33 @@
 {
   "project_info": {
-    "project_number": "255352657501",
-    "project_id": "radios-online-f6973",
-    "storage_bucket": "radios-online-f6973.appspot.com"
+    "project_number": "855795766229",
+    "project_id": "web-radios-7f423",
+    "storage_bucket": "web-radios-7f423.appspot.com"
   },
   "client": [
     {
       "client_info": {
-        "mobilesdk_app_id": "1:255352657501:android:3df9d933bb04d35ceb1fb4",
+        "mobilesdk_app_id": "1:855795766229:android:b6fdceac2078b280fe635c",
         "android_client_info": {
-          "package_name": "br.com.gms.radiosonline"
+          "package_name": "br.com.gms.webradios"
         }
       },
       "oauth_client": [
         {
-          "client_id": "255352657501-am97ash23f7j9ua9drs9brhcfq56n0dk.apps.googleusercontent.com",
+          "client_id": "855795766229-u1q3s3r9uv1rp4gpspclp4vhdsovggrq.apps.googleusercontent.com",
           "client_type": 3
         }
       ],
       "api_key": [
         {
-          "current_key": "AIzaSyCL8GgOKXK_iyEvbTa7sIwK5jQ_6fLzVXc"
+          "current_key": "AIzaSyCPSiE6XUmSck0IdFUOGrFEdH0XClCx_qA"
         }
       ],
       "services": {
         "appinvite_service": {
           "other_platform_oauth_client": [
             {
-              "client_id": "255352657501-am97ash23f7j9ua9drs9brhcfq56n0dk.apps.googleusercontent.com",
+              "client_id": "855795766229-u1q3s3r9uv1rp4gpspclp4vhdsovggrq.apps.googleusercontent.com",
               "client_type": 3
             }
           ]
@@ -36,27 +36,27 @@
     },
     {
       "client_info": {
-        "mobilesdk_app_id": "1:255352657501:android:1261d650e2be3e46eb1fb4",
+        "mobilesdk_app_id": "1:855795766229:android:450f52483cc43baffe635c",
         "android_client_info": {
-          "package_name": "br.com.gms.radiosonline.debug"
+          "package_name": "br.com.gms.webradios.debug"
         }
       },
       "oauth_client": [
         {
-          "client_id": "255352657501-am97ash23f7j9ua9drs9brhcfq56n0dk.apps.googleusercontent.com",
+          "client_id": "855795766229-u1q3s3r9uv1rp4gpspclp4vhdsovggrq.apps.googleusercontent.com",
           "client_type": 3
         }
       ],
       "api_key": [
         {
-          "current_key": "AIzaSyCL8GgOKXK_iyEvbTa7sIwK5jQ_6fLzVXc"
+          "current_key": "AIzaSyCPSiE6XUmSck0IdFUOGrFEdH0XClCx_qA"
         }
       ],
       "services": {
         "appinvite_service": {
           "other_platform_oauth_client": [
             {
-              "client_id": "255352657501-am97ash23f7j9ua9drs9brhcfq56n0dk.apps.googleusercontent.com",
+              "client_id": "855795766229-u1q3s3r9uv1rp4gpspclp4vhdsovggrq.apps.googleusercontent.com",
               "client_type": 3
             }
           ]
@@ -65,27 +65,27 @@
     },
     {
       "client_info": {
-        "mobilesdk_app_id": "1:255352657501:android:836a81ea95a38b9aeb1fb4",
+        "mobilesdk_app_id": "1:855795766229:android:f763b1c5e91d8966fe635c",
         "android_client_info": {
-          "package_name": "br.com.gms.radiosonline.staging"
+          "package_name": "br.com.gms.webradios.staging"
         }
       },
       "oauth_client": [
         {
-          "client_id": "255352657501-am97ash23f7j9ua9drs9brhcfq56n0dk.apps.googleusercontent.com",
+          "client_id": "855795766229-u1q3s3r9uv1rp4gpspclp4vhdsovggrq.apps.googleusercontent.com",
           "client_type": 3
         }
       ],
       "api_key": [
         {
-          "current_key": "AIzaSyCL8GgOKXK_iyEvbTa7sIwK5jQ_6fLzVXc"
+          "current_key": "AIzaSyCPSiE6XUmSck0IdFUOGrFEdH0XClCx_qA"
         }
       ],
       "services": {
         "appinvite_service": {
           "other_platform_oauth_client": [
             {
-              "client_id": "255352657501-am97ash23f7j9ua9drs9brhcfq56n0dk.apps.googleusercontent.com",
+              "client_id": "855795766229-u1q3s3r9uv1rp4gpspclp4vhdsovggrq.apps.googleusercontent.com",
               "client_type": 3
             }
           ]
